@@ -1,0 +1,307 @@
+{
+  "lastUpdated": "2026-01-04T06:03:54.047Z",
+  "season": "2025-26",
+  "totalPlayers": 30,
+  "players": [
+    {
+      "playerId": "77736401",
+      "name": "Ian Ziehl",
+      "teamId": "9113441",
+      "teamName": "WLLMAR",
+      "gp": 4,
+      "goals": 0,
+      "assists": 0,
+      "points": 0
+    },
+    {
+      "playerId": "77729420",
+      "name": "Brekxton Nelson",
+      "teamId": "9113395",
+      "teamName": "OWTNNA",
+      "gp": 6,
+      "goals": 0,
+      "assists": 0,
+      "points": 0
+    },
+    {
+      "playerId": "77720802",
+      "name": "Austin Wiemann",
+      "teamId": "9113573",
+      "teamName": "PRNCTN",
+      "gp": 1,
+      "goals": 0,
+      "assists": 0,
+      "points": 0
+    },
+    {
+      "playerId": "77677269",
+      "name": "Nico Huberty",
+      "teamId": "9113535",
+      "teamName": "MHTMDI",
+      "gp": 2,
+      "goals": 0,
+      "assists": 0,
+      "points": 0
+    },
+    {
+      "playerId": "77720560",
+      "name": "Jose Lehtimaki",
+      "teamId": "9113501",
+      "teamName": "D MRSL",
+      "gp": 3,
+      "goals": 0,
+      "assists": 0,
+      "points": 0
+    },
+    {
+      "playerId": "77729386",
+      "name": "Tiago Hettig",
+      "teamId": "9113412",
+      "teamName": "MNRIVR",
+      "gp": 2,
+      "goals": 0,
+      "assists": 0,
+      "points": 0
+    },
+    {
+      "playerId": "77699374",
+      "name": "Ashton Lee",
+      "teamId": "9113505",
+      "teamName": "PROCTR",
+      "gp": 3,
+      "goals": 0,
+      "assists": 0,
+      "points": 0
+    },
+    {
+      "playerId": "77684310",
+      "name": "Evan Enck",
+      "teamId": "9113490",
+      "teamName": "TONKA",
+      "gp": 9,
+      "goals": 0,
+      "assists": 0,
+      "points": 0
+    },
+    {
+      "playerId": "77814997",
+      "name": "Colin Devine",
+      "teamId": "9113758",
+      "teamName": "WSALEM",
+      "gp": 1,
+      "goals": 0,
+      "assists": 0,
+      "points": 0
+    },
+    {
+      "playerId": "77682080",
+      "name": "Nolan Johnson",
+      "teamId": "9113492",
+      "teamName": "STMA",
+      "gp": 3,
+      "goals": 0,
+      "assists": 0,
+      "points": 0
+    },
+    {
+      "playerId": "77835400",
+      "name": "Blake Pospychalla",
+      "teamId": "9264186",
+      "teamName": "ASHLND",
+      "gp": 1,
+      "goals": 0,
+      "assists": 0,
+      "points": 0
+    },
+    {
+      "playerId": "77686585",
+      "name": "Kayden Thalhuber",
+      "teamId": "9113595",
+      "teamName": "CENTNL",
+      "gp": 3,
+      "goals": 0,
+      "assists": 0,
+      "points": 0
+    },
+    {
+      "playerId": "77717457",
+      "name": "Nathan Altepeter",
+      "teamId": "9113584",
+      "teamName": "RLF",
+      "gp": 5,
+      "goals": 0,
+      "assists": 0,
+      "points": 0
+    },
+    {
+      "playerId": "77684311",
+      "name": "Chase Jerdee",
+      "teamId": "9113490",
+      "teamName": "TONKA",
+      "gp": 13,
+      "goals": 0,
+      "assists": 0,
+      "points": 0
+    },
+    {
+      "playerId": "77740770",
+      "name": "Sam Kramber",
+      "teamId": "9113724",
+      "teamName": "HUDSON",
+      "gp": 2,
+      "goals": 0,
+      "assists": 0,
+      "points": 0
+    },
+    {
+      "playerId": "77700091",
+      "name": "Teegyn Johnson",
+      "teamId": "9113516",
+      "teamName": "CRKSTN",
+      "gp": 3,
+      "goals": 0,
+      "assists": 0,
+      "points": 0
+    },
+    {
+      "playerId": "77720280",
+      "name": "Jacksyn Crary",
+      "teamId": "9113537",
+      "teamName": "STA",
+      "gp": 6,
+      "goals": 0,
+      "assists": 0,
+      "points": 0
+    },
+    {
+      "playerId": "77720986",
+      "name": "Anton Ackley",
+      "teamId": "9113468",
+      "teamName": "R LRDS",
+      "gp": 10,
+      "goals": 0,
+      "assists": 0,
+      "points": 0
+    },
+    {
+      "playerId": "77699010",
+      "name": "Ryker Landon",
+      "teamId": "9113393",
+      "teamName": "NFIELD",
+      "gp": 7,
+      "goals": 0,
+      "assists": 0,
+      "points": 0
+    },
+    {
+      "playerId": "77693544",
+      "name": "Christian Hill",
+      "teamId": "9113514",
+      "teamName": "BEMDJI",
+      "gp": 10,
+      "goals": 0,
+      "assists": 0,
+      "points": 0
+    },
+    {
+      "playerId": "77906086",
+      "name": "Noah Hamar",
+      "teamId": "9113701",
+      "teamName": "B CTRY",
+      "gp": 2,
+      "goals": 0,
+      "assists": 0,
+      "points": 0
+    },
+    {
+      "playerId": "77722995",
+      "name": "Gage Winkler",
+      "teamId": "9113635",
+      "teamName": "FRSTLK",
+      "gp": 1,
+      "goals": 0,
+      "assists": 0,
+      "points": 0
+    },
+    {
+      "playerId": "77720320",
+      "name": "Owen Ryan",
+      "teamId": "9113537",
+      "teamName": "STA",
+      "gp": 12,
+      "goals": 0,
+      "assists": 0,
+      "points": 0
+    },
+    {
+      "playerId": "77696727",
+      "name": "Aidan Finn",
+      "teamId": "9113626",
+      "teamName": "ROSEMT",
+      "gp": 4,
+      "goals": 0,
+      "assists": 0,
+      "points": 0
+    },
+    {
+      "playerId": "77836964",
+      "name": "Keaton Cooper",
+      "teamId": "9113717",
+      "teamName": "FTFRAN",
+      "gp": 2,
+      "goals": 0,
+      "assists": 0,
+      "points": 0
+    },
+    {
+      "playerId": "77758110",
+      "name": "Noah Moch",
+      "teamId": "9113607",
+      "teamName": "TOTINO",
+      "gp": 7,
+      "goals": 0,
+      "assists": 0,
+      "points": 0
+    },
+    {
+      "playerId": "77686928",
+      "name": "Mason Schreiber",
+      "teamId": "9113391",
+      "teamName": "MKTO W",
+      "gp": 11,
+      "goals": 0,
+      "assists": 0,
+      "points": 0
+    },
+    {
+      "playerId": "77718663",
+      "name": "Marek  Wozniak",
+      "teamId": "9113558",
+      "teamName": "WCONIA",
+      "gp": 6,
+      "goals": 0,
+      "assists": 0,
+      "points": 0
+    },
+    {
+      "playerId": "77697879",
+      "name": "Finn Hanson",
+      "teamId": "9113526",
+      "teamName": "WRROAD",
+      "gp": 13,
+      "goals": 0,
+      "assists": 0,
+      "points": 0
+    },
+    {
+      "playerId": "77708624",
+      "name": "Jackson Juhlin",
+      "teamId": "9113589",
+      "teamName": "BLAINE",
+      "gp": 3,
+      "goals": 0,
+      "assists": 0,
+      "points": 0
+    }
+  ]
+}
