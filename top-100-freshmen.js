@@ -233,22 +233,19 @@
     tableWrapper.appendChild(table);
     container.appendChild(tableWrapper);
     
-    // Find the script tag that loaded this script
-    const scripts = document.getElementsByTagName('script');
-    const currentScript = scripts[scripts.length - 1];
-    
-    // Insert the table right after the script tag
-    if (currentScript && currentScript.parentNode) {
-      console.log('Inserting table after current script tag');
-      currentScript.parentNode.insertBefore(container, currentScript.nextSibling);
+    // Check if there's a placeholder from the page
+    if (window.top100PlaceholderFreshmen) {
+      console.log('Found placeholder, inserting table there');
+      window.top100PlaceholderFreshmen.appendChild(container);
     } else {
-      // Fallback: try to find a good container
-      const targets = document.querySelectorAll('.sn-element, .column, .row, .container, main, #main');
-      if (targets.length > 0) {
-        console.log('Inserting into first .sn-element or similar');
-        targets[0].insertBefore(container, targets[0].firstChild);
+      console.log('No placeholder found, trying document.currentScript');
+      // Try to find where this script was loaded from
+      const placeholder = document.getElementById('top100-placeholder-freshmen');
+      if (placeholder) {
+        console.log('Found placeholder by ID');
+        placeholder.appendChild(container);
       } else {
-        console.log('Inserting at beginning of body');
+        console.log('No placeholder, inserting at top of body');
         document.body.insertBefore(container, document.body.firstChild);
       }
     }
