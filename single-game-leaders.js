@@ -4,7 +4,7 @@
 
   var updated = document.createElement('p');
   updated.style.cssText = 'color:#666;font-size:13px;margin:0 0 20px 0';
-  updated.textContent = 'Last updated: 2026-04-11 12:49';
+  updated.textContent = 'Last updated: 2026-04-11 13:09';
   container.appendChild(updated);
 
   // --- Most Goals ---
@@ -29,126 +29,126 @@
 <td>International Falls</td>
 <td>6</td>
 <td><a href="https://www.legacy.hockey/game/show/44771292?subseason=948428" target="_blank" style="color:#162747;text-decoration:none" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">Lake of the Woods at International Falls</a></td>
-<td>November 25, 2025</td>
+<td>Nov. 25, 2025</td>
 </tr>
 <tr class="even">
 <td><a href="https://www.legacy.hockey/roster_players/77679320" target="_blank" style="color:#162747;text-decoration:none" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">Drake Sternhagen</a></td>
 <td>Albert Lea</td>
 <td>6</td>
 <td><a href="https://www.legacy.hockey/game/show/44770111?subseason=948428" target="_blank" style="color:#162747;text-decoration:none" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">La Crescent-Hokah at Albert Lea</a></td>
-<td>December 11, 2025</td>
+<td>Dec. 11, 2025</td>
 </tr>
 <tr class="odd">
 <td><a href="https://www.legacy.hockey/roster_players/77700079" target="_blank" style="color:#162747;text-decoration:none" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">Garrett Fischer</a></td>
 <td><a href="http://www.legacy.hockey/page/show/9113380-conference-standings-2025-26-" target="_blank" style="color:#162747;text-decoration:none" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">Crookston</a></td>
 <td>6</td>
 <td><a href="https://www.legacy.hockey/game/show/44771280?subseason=948428" target="_blank" style="color:#162747;text-decoration:none" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">Crookston at Park Rapids</a></td>
-<td>January 5, 2026</td>
+<td>Jan. 5, 2026</td>
 </tr>
 <tr class="even">
 <td><a href="https://www.legacy.hockey/roster_players/77700228" target="_blank" style="color:#162747;text-decoration:none" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">Finn Henry</a></td>
 <td>Park Rapids</td>
 <td>6</td>
 <td><a href="https://www.legacy.hockey/game/show/44771684?subseason=948428" target="_blank" style="color:#162747;text-decoration:none" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">Prairie Centre at Park Rapids</a></td>
-<td>January 8, 2026</td>
+<td>Jan. 8, 2026</td>
 </tr>
 <tr class="odd">
 <td><a href="https://www.legacy.hockey/roster_players/77736910" target="_blank" style="color:#162747;text-decoration:none" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">Jackson Knight</a></td>
 <td>Orono</td>
 <td>6</td>
 <td><a href="https://www.legacy.hockey/game/show/44771153?subseason=948428" target="_blank" style="color:#162747;text-decoration:none" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">Chaska at Orono</a></td>
-<td>February 7, 2026</td>
+<td>Feb. 7, 2026</td>
 </tr>
 <tr class="even">
 <td><a href="https://www.legacy.hockey/roster_players/77692467" target="_blank" style="color:#162747;text-decoration:none" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">Brandon Rodenwald</a></td>
 <td><a href="http://www.legacy.hockey/page/show/9113380-conference-standings-2025-26-" target="_blank" style="color:#162747;text-decoration:none" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">Buffalo</a></td>
 <td>5</td>
 <td><a href="https://www.legacy.hockey/game/show/44770675?subseason=948428" target="_blank" style="color:#162747;text-decoration:none" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">Buffalo at Osseo</a></td>
-<td>November 25, 2025</td>
+<td>Nov. 25, 2025</td>
 </tr>
 <tr class="odd">
 <td><a href="https://www.legacy.hockey/roster_players/77693482" target="_blank" style="color:#162747;text-decoration:none" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">Taevon Welle</a></td>
 <td><a href="http://www.legacy.hockey/page/show/9113380-conference-standings-2025-26-" target="_blank" style="color:#162747;text-decoration:none" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">Bemidji</a></td>
 <td>5</td>
 <td><a href="https://www.legacy.hockey/game/show/44770936?subseason=948428" target="_blank" style="color:#162747;text-decoration:none" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">Bemidji at Thief River Falls</a></td>
-<td>December 2, 2025</td>
+<td>Dec. 2, 2025</td>
 </tr>
 <tr class="even">
 <td><a href="https://www.legacy.hockey/roster_players/77736264" target="_blank" style="color:#162747;text-decoration:none" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">Bode McConnell</a></td>
 <td><a href="http://www.legacy.hockey/page/show/9113380-conference-standings-2025-26-" target="_blank" style="color:#162747;text-decoration:none" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">Edina</a></td>
 <td>5</td>
 <td><a href="https://www.legacy.hockey/game/show/44770723?subseason=948428" target="_blank" style="color:#162747;text-decoration:none" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">Edina at St. Louis Park</a></td>
-<td>December 4, 2025</td>
+<td>Dec. 4, 2025</td>
 </tr>
 <tr class="odd">
 <td><a href="https://www.legacy.hockey/roster_players/77346671" target="_blank" style="color:#162747;text-decoration:none" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">Anthony Yerxa</a></td>
 <td><a href="http://www.legacy.hockey/page/show/9113380-conference-standings-2025-26-" target="_blank" style="color:#162747;text-decoration:none" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">International Falls</a></td>
 <td>5</td>
 <td><a href="https://www.legacy.hockey/game/show/44770684?subseason=948428" target="_blank" style="color:#162747;text-decoration:none" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">International Falls at Mora/Milaca</a></td>
-<td>December 6, 2025</td>
+<td>Dec. 6, 2025</td>
 </tr>
 <tr class="even">
 <td><a href="https://www.legacy.hockey/roster_players/77682065" target="_blank" style="color:#162747;text-decoration:none" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">Tanner Esterberg</a></td>
 <td><a href="http://www.legacy.hockey/page/show/9113380-conference-standings-2025-26-" target="_blank" style="color:#162747;text-decoration:none" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">St. Michael-Albertville</a></td>
 <td>5</td>
 <td><a href="https://www.legacy.hockey/game/show/44770659?subseason=948428" target="_blank" style="color:#162747;text-decoration:none" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">St. Michael-Albertville at Hopkins</a></td>
-<td>December 13, 2025</td>
+<td>Dec. 13, 2025</td>
 </tr>
 <tr class="odd">
 <td><a href="https://www.legacy.hockey/roster_players/77681690" target="_blank" style="color:#162747;text-decoration:none" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">Lincoln Ayers Assad*</a></td>
 <td><a href="http://www.legacy.hockey/page/show/9113380-conference-standings-2025-26-" target="_blank" style="color:#162747;text-decoration:none" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">Academy of Holy Angels</a></td>
 <td>5</td>
 <td><a href="https://www.legacy.hockey/game/show/44771636?subseason=948428" target="_blank" style="color:#162747;text-decoration:none" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">Academy of Holy Angels at St. Louis Park</a></td>
-<td>December 16, 2025</td>
+<td>Dec. 16, 2025</td>
 </tr>
 <tr class="even">
 <td><a href="https://www.legacy.hockey/roster_players/77704391" target="_blank" style="color:#162747;text-decoration:none" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">Leyton Fuchs</a></td>
 <td><a href="http://www.legacy.hockey/page/show/9113380-conference-standings-2025-26-" target="_blank" style="color:#162747;text-decoration:none" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">Prairie Centre</a></td>
 <td>5</td>
 <td><a href="https://www.legacy.hockey/game/show/44771684?subseason=948428" target="_blank" style="color:#162747;text-decoration:none" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">Prairie Centre at Park Rapids</a></td>
-<td>January 8, 2026</td>
+<td>Jan. 8, 2026</td>
 </tr>
 <tr class="odd">
 <td><a href="https://www.legacy.hockey/roster_players/77718989" target="_blank" style="color:#162747;text-decoration:none" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">Otto Schoenrock</a></td>
 <td><a href="http://www.legacy.hockey/page/show/9113380-conference-standings-2025-26-" target="_blank" style="color:#162747;text-decoration:none" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">Waseca</a></td>
 <td>5</td>
 <td><a href="https://www.legacy.hockey/game/show/44770379?subseason=948428" target="_blank" style="color:#162747;text-decoration:none" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">Waseca at Redwood Valley</a></td>
-<td>January 8, 2026</td>
+<td>Jan. 8, 2026</td>
 </tr>
 <tr class="even">
 <td><a href="https://www.legacy.hockey/roster_players/77643797" target="_blank" style="color:#162747;text-decoration:none" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">Daniel Halonen (Capt.)</a></td>
 <td><a href="http://www.legacy.hockey/page/show/9113380-conference-standings-2025-26-" target="_blank" style="color:#162747;text-decoration:none" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">Delano</a></td>
 <td>5</td>
 <td><a href="https://www.legacy.hockey/game/show/44771754?subseason=948428" target="_blank" style="color:#162747;text-decoration:none" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">Delano at Hutchinson</a></td>
-<td>January 26, 2026</td>
+<td>Jan. 26, 2026</td>
 </tr>
 <tr class="odd">
 <td><a href="https://www.legacy.hockey/roster_players/77759358" target="_blank" style="color:#162747;text-decoration:none" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">Gavin Kester</a></td>
 <td>Fairmont</td>
 <td>5</td>
 <td><a href="https://www.legacy.hockey/game/show/44770274?subseason=948428" target="_blank" style="color:#162747;text-decoration:none" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">Worthington at Fairmont</a></td>
-<td>January 27, 2026</td>
+<td>Jan. 27, 2026</td>
 </tr>
 <tr class="even">
 <td><a href="https://www.legacy.hockey/roster_players/77664136" target="_blank" style="color:#162747;text-decoration:none" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">Maddux Domagala</a></td>
 <td>Luverne</td>
 <td>5</td>
 <td><a href="https://www.legacy.hockey/game/show/44770295?subseason=948428" target="_blank" style="color:#162747;text-decoration:none" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">Austin at Luverne</a></td>
-<td>January 31, 2026</td>
+<td>Jan. 31, 2026</td>
 </tr>
 <tr class="odd">
 <td><a href="https://www.legacy.hockey/roster_players/77718939" target="_blank" style="color:#162747;text-decoration:none" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">Henry Huttemier</a></td>
 <td>Waseca</td>
 <td>5</td>
 <td><a href="https://www.legacy.hockey/game/show/44770276?subseason=948428" target="_blank" style="color:#162747;text-decoration:none" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">Fairmont at Waseca</a></td>
-<td>February 5, 2026</td>
+<td>Feb. 5, 2026</td>
 </tr>
 <tr class="even">
 <td><a href="https://www.legacy.hockey/roster_players/77664136" target="_blank" style="color:#162747;text-decoration:none" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">Maddux Domagala</a></td>
 <td>Luverne</td>
 <td>5</td>
 <td><a href="https://www.legacy.hockey/game/show/45173011?subseason=948428" target="_blank" style="color:#162747;text-decoration:none" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">New Ulm at Luverne</a></td>
-<td>February 21, 2026</td>
+<td>Feb. 21, 2026</td>
 </tr>
 </tbody></table></div></div>`;
   container.appendChild(wrap_s_most_goals);
@@ -175,105 +175,105 @@
 <td>Waseca</td>
 <td>7</td>
 <td><a href="https://www.legacy.hockey/game/show/44770382?subseason=948428" target="_blank" style="color:#162747;text-decoration:none" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">Windom at Waseca</a></td>
-<td>February 3, 2026</td>
+<td>Feb. 3, 2026</td>
 </tr>
 <tr class="even">
 <td><a href="https://www.legacy.hockey/roster_players/77686457" target="_blank" style="color:#162747;text-decoration:none" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">Eli Milinkovich</a></td>
 <td><a href="http://www.legacy.hockey/page/show/9113380-conference-standings-2025-26-" target="_blank" style="color:#162747;text-decoration:none" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">Breck</a></td>
 <td>6</td>
 <td><a href="https://www.legacy.hockey/game/show/44770606?subseason=948428" target="_blank" style="color:#162747;text-decoration:none" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">Breck at St. Paul Academy</a></td>
-<td>November 20, 2025</td>
+<td>Nov. 20, 2025</td>
 </tr>
 <tr class="odd">
 <td><a href="https://www.legacy.hockey/roster_players/77664125" target="_blank" style="color:#162747;text-decoration:none" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">Landyn Lais</a></td>
 <td>Luverne</td>
 <td>6</td>
 <td><a href="https://www.legacy.hockey/game/show/44770280?subseason=948428" target="_blank" style="color:#162747;text-decoration:none" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">Worthington at Luverne</a></td>
-<td>November 25, 2025</td>
+<td>Nov. 25, 2025</td>
 </tr>
 <tr class="even">
 <td><a href="https://www.legacy.hockey/roster_players/77664136" target="_blank" style="color:#162747;text-decoration:none" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">Maddux Domagala</a></td>
 <td>Luverne</td>
 <td>6</td>
 <td><a href="https://www.legacy.hockey/game/show/44770280?subseason=948428" target="_blank" style="color:#162747;text-decoration:none" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">Worthington at Luverne</a></td>
-<td>November 25, 2025</td>
+<td>Nov. 25, 2025</td>
 </tr>
 <tr class="odd">
 <td><a href="https://www.legacy.hockey/roster_players/77719102" target="_blank" style="color:#162747;text-decoration:none" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">Jackson Dahl</a></td>
 <td><a href="http://www.legacy.hockey/page/show/9113380-conference-standings-2025-26-" target="_blank" style="color:#162747;text-decoration:none" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">Waseca</a></td>
 <td>6</td>
 <td><a href="https://www.legacy.hockey/game/show/44770378?subseason=948428" target="_blank" style="color:#162747;text-decoration:none" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">Waseca at Worthington</a></td>
-<td>December 11, 2025</td>
+<td>Dec. 11, 2025</td>
 </tr>
 <tr class="even">
 <td><a href="https://www.legacy.hockey/roster_players/77681702" target="_blank" style="color:#162747;text-decoration:none" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">Cole Cheeseman*</a></td>
 <td><a href="http://www.legacy.hockey/page/show/9113380-conference-standings-2025-26-" target="_blank" style="color:#162747;text-decoration:none" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">Academy of Holy Angels</a></td>
 <td>6</td>
 <td><a href="https://www.legacy.hockey/game/show/44771636?subseason=948428" target="_blank" style="color:#162747;text-decoration:none" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">Academy of Holy Angels at St. Louis Park</a></td>
-<td>December 16, 2025</td>
+<td>Dec. 16, 2025</td>
 </tr>
 <tr class="odd">
 <td><a href="https://www.legacy.hockey/roster_players/77720450" target="_blank" style="color:#162747;text-decoration:none" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">Liam Grant</a></td>
 <td><a href="http://www.legacy.hockey/page/show/9113380-conference-standings-2025-26-" target="_blank" style="color:#162747;text-decoration:none" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">Westonka</a></td>
 <td>6</td>
 <td><a href="https://www.legacy.hockey/game/show/44770591?subseason=948428" target="_blank" style="color:#162747;text-decoration:none" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">Westonka at Providence Academy</a></td>
-<td>December 16, 2025</td>
+<td>Dec. 16, 2025</td>
 </tr>
 <tr class="even">
 <td><a href="https://www.legacy.hockey/roster_players/77719076" target="_blank" style="color:#162747;text-decoration:none" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">Griffin Storey</a></td>
 <td><a href="http://www.legacy.hockey/page/show/9113380-conference-standings-2025-26-" target="_blank" style="color:#162747;text-decoration:none" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">Waseca</a></td>
 <td>6</td>
 <td><a href="https://www.legacy.hockey/game/show/44770379?subseason=948428" target="_blank" style="color:#162747;text-decoration:none" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">Waseca at Redwood Valley</a></td>
-<td>January 8, 2026</td>
+<td>Jan. 8, 2026</td>
 </tr>
 <tr class="odd">
 <td><a href="https://www.legacy.hockey/roster_players/77720296" target="_blank" style="color:#162747;text-decoration:none" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">Maverick McKinnon</a></td>
 <td><a href="http://www.legacy.hockey/page/show/9113380-conference-standings-2025-26-" target="_blank" style="color:#162747;text-decoration:none" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">St. Thomas Academy</a></td>
 <td>6</td>
 <td><a href="https://www.legacy.hockey/game/show/44771048?subseason=948428" target="_blank" style="color:#162747;text-decoration:none" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">St. Thomas Academy at Two Rivers</a></td>
-<td>January 15, 2026</td>
+<td>Jan. 15, 2026</td>
 </tr>
 <tr class="even">
 <td><a href="https://www.legacy.hockey/roster_players/77716983" target="_blank" style="color:#162747;text-decoration:none" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">Easton Neppl</a></td>
 <td>Breckenridge/Wahpeton</td>
 <td>6</td>
 <td><a href="https://www.legacy.hockey/game/show/44771678?subseason=948428" target="_blank" style="color:#162747;text-decoration:none" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">Park Rapids at Breckenridge/Wahpeton</a></td>
-<td>January 15, 2026</td>
+<td>Jan. 15, 2026</td>
 </tr>
 <tr class="odd">
 <td><a href="https://www.legacy.hockey/roster_players/77687108" target="_blank" style="color:#162747;text-decoration:none" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">Oskar Rydberg</a></td>
 <td>Pine City Area</td>
 <td>6</td>
 <td><a href="https://www.legacy.hockey/game/show/44771215?subseason=948428" target="_blank" style="color:#162747;text-decoration:none" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">Becker/Big Lake at Pine City Area</a></td>
-<td>January 16, 2026</td>
+<td>Jan. 16, 2026</td>
 </tr>
 <tr class="even">
 <td><a href="https://www.legacy.hockey/roster_players/77664136" target="_blank" style="color:#162747;text-decoration:none" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">Maddux Domagala</a></td>
 <td>Luverne</td>
 <td>6</td>
 <td><a href="https://www.legacy.hockey/game/show/44770292?subseason=948428" target="_blank" style="color:#162747;text-decoration:none" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">Redwood Valley at Luverne</a></td>
-<td>January 22, 2026</td>
+<td>Jan. 22, 2026</td>
 </tr>
 <tr class="odd">
 <td><a href="https://www.legacy.hockey/roster_players/77720302" target="_blank" style="color:#162747;text-decoration:none" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">Cole Braunshausen</a></td>
 <td>St. Thomas Academy</td>
 <td>6</td>
 <td><a href="https://www.legacy.hockey/game/show/44771055?subseason=948428" target="_blank" style="color:#162747;text-decoration:none" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">South St. Paul at St. Thomas Academy</a></td>
-<td>January 31, 2026</td>
+<td>Jan. 31, 2026</td>
 </tr>
 <tr class="even">
 <td><a href="https://www.legacy.hockey/roster_players/77718939" target="_blank" style="color:#162747;text-decoration:none" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">Henry Huttemier</a></td>
 <td>Waseca</td>
 <td>6</td>
 <td><a href="https://www.legacy.hockey/game/show/44770276?subseason=948428" target="_blank" style="color:#162747;text-decoration:none" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">Fairmont at Waseca</a></td>
-<td>February 5, 2026</td>
+<td>Feb. 5, 2026</td>
 </tr>
 <tr class="odd">
 <td><a href="https://www.legacy.hockey/roster_players/77718991" target="_blank" style="color:#162747;text-decoration:none" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">Cash Lynch</a></td>
 <td>Waseca</td>
 <td>6</td>
 <td><a href="https://www.legacy.hockey/game/show/44770276?subseason=948428" target="_blank" style="color:#162747;text-decoration:none" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">Fairmont at Waseca</a></td>
-<td>February 5, 2026</td>
+<td>Feb. 5, 2026</td>
 </tr>
 </tbody></table></div></div>`;
   container.appendChild(wrap_s_most_assists);
@@ -300,98 +300,98 @@
 <td>Waseca</td>
 <td>11</td>
 <td><a href="https://www.legacy.hockey/game/show/44770382?subseason=948428" target="_blank" style="color:#162747;text-decoration:none" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">Windom at Waseca</a></td>
-<td>February 3, 2026</td>
+<td>Feb. 3, 2026</td>
 </tr>
 <tr class="even">
 <td><a href="https://www.legacy.hockey/roster_players/77718939" target="_blank" style="color:#162747;text-decoration:none" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">Henry Huttemier</a></td>
 <td>Waseca</td>
 <td>11</td>
 <td><a href="https://www.legacy.hockey/game/show/44770276?subseason=948428" target="_blank" style="color:#162747;text-decoration:none" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">Fairmont at Waseca</a></td>
-<td>February 5, 2026</td>
+<td>Feb. 5, 2026</td>
 </tr>
 <tr class="odd">
 <td><a href="https://www.legacy.hockey/roster_players/77346671" target="_blank" style="color:#162747;text-decoration:none" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">Anthony Yerxa</a></td>
 <td>International Falls</td>
 <td>9</td>
 <td><a href="https://www.legacy.hockey/game/show/44771292?subseason=948428" target="_blank" style="color:#162747;text-decoration:none" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">Lake of the Woods at International Falls</a></td>
-<td>November 25, 2025</td>
+<td>Nov. 25, 2025</td>
 </tr>
 <tr class="even">
 <td><a href="https://www.legacy.hockey/roster_players/77692467" target="_blank" style="color:#162747;text-decoration:none" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">Brandon Rodenwald</a></td>
 <td><a href="http://www.legacy.hockey/page/show/9113380-conference-standings-2025-26-" target="_blank" style="color:#162747;text-decoration:none" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">Buffalo</a></td>
 <td>8</td>
 <td><a href="https://www.legacy.hockey/game/show/44770675?subseason=948428" target="_blank" style="color:#162747;text-decoration:none" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">Buffalo at Osseo</a></td>
-<td>November 25, 2025</td>
+<td>Nov. 25, 2025</td>
 </tr>
 <tr class="odd">
 <td><a href="https://www.legacy.hockey/roster_players/77664125" target="_blank" style="color:#162747;text-decoration:none" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">Landyn Lais</a></td>
 <td>Luverne</td>
 <td>8</td>
 <td><a href="https://www.legacy.hockey/game/show/44770280?subseason=948428" target="_blank" style="color:#162747;text-decoration:none" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">Worthington at Luverne</a></td>
-<td>November 25, 2025</td>
+<td>Nov. 25, 2025</td>
 </tr>
 <tr class="even">
 <td><a href="https://www.legacy.hockey/roster_players/77664136" target="_blank" style="color:#162747;text-decoration:none" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">Maddux Domagala</a></td>
 <td>Luverne</td>
 <td>8</td>
 <td><a href="https://www.legacy.hockey/game/show/44770280?subseason=948428" target="_blank" style="color:#162747;text-decoration:none" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">Worthington at Luverne</a></td>
-<td>November 25, 2025</td>
+<td>Nov. 25, 2025</td>
 </tr>
 <tr class="odd">
 <td><a href="https://www.legacy.hockey/roster_players/77700079" target="_blank" style="color:#162747;text-decoration:none" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">Garrett Fischer</a></td>
 <td><a href="http://www.legacy.hockey/page/show/9113380-conference-standings-2025-26-" target="_blank" style="color:#162747;text-decoration:none" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">Crookston</a></td>
 <td>8</td>
 <td><a href="https://www.legacy.hockey/game/show/44771280?subseason=948428" target="_blank" style="color:#162747;text-decoration:none" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">Crookston at Park Rapids</a></td>
-<td>January 5, 2026</td>
+<td>Jan. 5, 2026</td>
 </tr>
 <tr class="even">
 <td><a href="https://www.legacy.hockey/roster_players/77719076" target="_blank" style="color:#162747;text-decoration:none" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">Griffin Storey</a></td>
 <td><a href="http://www.legacy.hockey/page/show/9113380-conference-standings-2025-26-" target="_blank" style="color:#162747;text-decoration:none" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">Waseca</a></td>
 <td>8</td>
 <td><a href="https://www.legacy.hockey/game/show/44770379?subseason=948428" target="_blank" style="color:#162747;text-decoration:none" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">Waseca at Redwood Valley</a></td>
-<td>January 8, 2026</td>
+<td>Jan. 8, 2026</td>
 </tr>
 <tr class="odd">
 <td><a href="https://www.legacy.hockey/roster_players/77716973" target="_blank" style="color:#162747;text-decoration:none" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">Gracin Kaste</a></td>
 <td>Breckenridge/Wahpeton</td>
 <td>8</td>
 <td><a href="https://www.legacy.hockey/game/show/44771678?subseason=948428" target="_blank" style="color:#162747;text-decoration:none" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">Park Rapids at Breckenridge/Wahpeton</a></td>
-<td>January 15, 2026</td>
+<td>Jan. 15, 2026</td>
 </tr>
 <tr class="even">
 <td><a href="https://www.legacy.hockey/roster_players/77716983" target="_blank" style="color:#162747;text-decoration:none" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">Easton Neppl</a></td>
 <td>Breckenridge/Wahpeton</td>
 <td>8</td>
 <td><a href="https://www.legacy.hockey/game/show/44771678?subseason=948428" target="_blank" style="color:#162747;text-decoration:none" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">Park Rapids at Breckenridge/Wahpeton</a></td>
-<td>January 15, 2026</td>
+<td>Jan. 15, 2026</td>
 </tr>
 <tr class="odd">
 <td><a href="https://www.legacy.hockey/roster_players/77664136" target="_blank" style="color:#162747;text-decoration:none" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">Maddux Domagala</a></td>
 <td>Luverne</td>
 <td>8</td>
 <td><a href="https://www.legacy.hockey/game/show/44770292?subseason=948428" target="_blank" style="color:#162747;text-decoration:none" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">Redwood Valley at Luverne</a></td>
-<td>January 22, 2026</td>
+<td>Jan. 22, 2026</td>
 </tr>
 <tr class="even">
 <td><a href="https://www.legacy.hockey/roster_players/77664136" target="_blank" style="color:#162747;text-decoration:none" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">Maddux Domagala</a></td>
 <td><a href="http://www.legacy.hockey/page/show/9113380-conference-standings-2025-26-" target="_blank" style="color:#162747;text-decoration:none" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">Luverne</a></td>
 <td>8</td>
 <td><a href="https://www.legacy.hockey/game/show/44770294?subseason=948428" target="_blank" style="color:#162747;text-decoration:none" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">Luverne at Worthington</a></td>
-<td>January 29, 2026</td>
+<td>Jan. 29, 2026</td>
 </tr>
 <tr class="odd">
 <td><a href="https://www.legacy.hockey/roster_players/77718991" target="_blank" style="color:#162747;text-decoration:none" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">Cash Lynch</a></td>
 <td>Waseca</td>
 <td>8</td>
 <td><a href="https://www.legacy.hockey/game/show/44770276?subseason=948428" target="_blank" style="color:#162747;text-decoration:none" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">Fairmont at Waseca</a></td>
-<td>February 5, 2026</td>
+<td>Feb. 5, 2026</td>
 </tr>
 <tr class="even">
 <td><a href="https://www.legacy.hockey/roster_players/77719076" target="_blank" style="color:#162747;text-decoration:none" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">Griffin Storey</a></td>
 <td>Waseca</td>
 <td>8</td>
 <td><a href="https://www.legacy.hockey/game/show/44770276?subseason=948428" target="_blank" style="color:#162747;text-decoration:none" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">Fairmont at Waseca</a></td>
-<td>February 5, 2026</td>
+<td>Feb. 5, 2026</td>
 </tr>
 </tbody></table></div></div>`;
   container.appendChild(wrap_s_most_points);
@@ -418,77 +418,77 @@
 <td>Faribault</td>
 <td>78</td>
 <td><a href="https://www.legacy.hockey/game/show/44770236?subseason=948428" target="_blank" style="color:#162747;text-decoration:none" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">Northfield at Faribault</a></td>
-<td>February 7, 2026</td>
+<td>Feb. 7, 2026</td>
 </tr>
 <tr class="even">
 <td><a href="https://www.legacy.hockey/roster_players/77736632" target="_blank" style="color:#162747;text-decoration:none" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">Brookston Hildebrandt</a></td>
 <td><a href="http://www.legacy.hockey/page/show/9113380-conference-standings-2025-26-" target="_blank" style="color:#162747;text-decoration:none" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">Bagley/Fosston</a></td>
 <td>67</td>
 <td><a href="https://www.legacy.hockey/game/show/44770092?subseason=948428" target="_blank" style="color:#162747;text-decoration:none" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">Bagley/Fosston at International Falls</a></td>
-<td>December 31, 2025</td>
+<td>Dec. 31, 2025</td>
 </tr>
 <tr class="odd">
 <td><a href="https://www.legacy.hockey/roster_players/77737334" target="_blank" style="color:#162747;text-decoration:none" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">Owen Unglesbee</a></td>
 <td>Simley</td>
 <td>67</td>
 <td><a href="https://www.legacy.hockey/game/show/44771029?subseason=948428" target="_blank" style="color:#162747;text-decoration:none" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">Mahtomedi at Simley</a></td>
-<td>February 5, 2026</td>
+<td>Feb. 5, 2026</td>
 </tr>
 <tr class="even">
 <td><a href="https://www.legacy.hockey/roster_players/77740039" target="_blank" style="color:#162747;text-decoration:none" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">Tait Johnson</a></td>
 <td><a href="http://www.legacy.hockey/page/show/9113380-conference-standings-2025-26-" target="_blank" style="color:#162747;text-decoration:none" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">Austin</a></td>
 <td>67</td>
 <td><a href="https://www.legacy.hockey/game/show/45172572?subseason=948428" target="_blank" style="color:#162747;text-decoration:none" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">Austin at Farmington</a></td>
-<td>February 19, 2026</td>
+<td>Feb. 19, 2026</td>
 </tr>
 <tr class="odd">
 <td><a href="https://www.legacy.hockey/roster_players/77737302" target="_blank" style="color:#162747;text-decoration:none" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">CJ Callan</a></td>
 <td>Faribault</td>
 <td>66</td>
 <td><a href="https://www.legacy.hockey/game/show/44770184?subseason=948428" target="_blank" style="color:#162747;text-decoration:none" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">Rochester Mayo at Faribault</a></td>
-<td>December 6, 2025</td>
+<td>Dec. 6, 2025</td>
 </tr>
 <tr class="even">
 <td><a href="https://www.legacy.hockey/roster_players/77737302" target="_blank" style="color:#162747;text-decoration:none" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">CJ Callan</a></td>
 <td><a href="http://www.legacy.hockey/page/show/9113380-conference-standings-2025-26-" target="_blank" style="color:#162747;text-decoration:none" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">Faribault</a></td>
 <td>66</td>
 <td><a href="https://www.legacy.hockey/game/show/44770185?subseason=948428" target="_blank" style="color:#162747;text-decoration:none" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">Faribault at Rochester Century/John Marshall</a></td>
-<td>January 20, 2026</td>
+<td>Jan. 20, 2026</td>
 </tr>
 <tr class="odd">
 <td><a href="https://www.legacy.hockey/roster_players/77688231" target="_blank" style="color:#162747;text-decoration:none" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">Izaak Kalis</a></td>
 <td><a href="http://www.legacy.hockey/page/show/9113380-conference-standings-2025-26-" target="_blank" style="color:#162747;text-decoration:none" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">Little Falls</a></td>
 <td>65</td>
 <td><a href="https://www.legacy.hockey/game/show/44770279?subseason=948428" target="_blank" style="color:#162747;text-decoration:none" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">Little Falls at Luverne</a></td>
-<td>November 22, 2025</td>
+<td>Nov. 22, 2025</td>
 </tr>
 <tr class="even">
 <td><a href="https://www.legacy.hockey/roster_players/77737302" target="_blank" style="color:#162747;text-decoration:none" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">CJ Callan</a></td>
 <td><a href="http://www.legacy.hockey/page/show/9113380-conference-standings-2025-26-" target="_blank" style="color:#162747;text-decoration:none" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">Faribault</a></td>
 <td>65</td>
 <td><a href="https://www.legacy.hockey/game/show/44770117?subseason=948428" target="_blank" style="color:#162747;text-decoration:none" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">Faribault at Winona</a></td>
-<td>December 9, 2025</td>
+<td>Dec. 9, 2025</td>
 </tr>
 <tr class="odd">
 <td><a href="https://www.legacy.hockey/roster_players/77719443" target="_blank" style="color:#162747;text-decoration:none" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">Harrison Betker</a></td>
 <td>Osseo</td>
 <td>65</td>
 <td><a href="https://www.legacy.hockey/game/show/44771344?subseason=948428" target="_blank" style="color:#162747;text-decoration:none" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">Anoka at Osseo</a></td>
-<td>January 29, 2026</td>
+<td>Jan. 29, 2026</td>
 </tr>
 <tr class="even">
 <td><a href="https://www.legacy.hockey/roster_players/77719613" target="_blank" style="color:#162747;text-decoration:none" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">Dylan Slama</a></td>
 <td><a href="http://www.legacy.hockey/page/show/9113380-conference-standings-2025-26-" target="_blank" style="color:#162747;text-decoration:none" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">Moose Lake Area</a></td>
 <td>65</td>
 <td><a href="https://www.legacy.hockey/game/show/44771701?subseason=948428" target="_blank" style="color:#162747;text-decoration:none" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">Moose Lake Area at International Falls</a></td>
-<td>February 5, 2026</td>
+<td>Feb. 5, 2026</td>
 </tr>
 <tr class="odd">
 <td><a href="https://www.legacy.hockey/roster_players/77740012" target="_blank" style="color:#162747;text-decoration:none" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">Kason Helgeson</a></td>
 <td><a href="http://www.legacy.hockey/page/show/9113380-conference-standings-2025-26-" target="_blank" style="color:#162747;text-decoration:none" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">Morris/Benson Area</a></td>
 <td>65</td>
 <td><a href="https://www.legacy.hockey/game/show/45170664?subseason=948428" target="_blank" style="color:#162747;text-decoration:none" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">Morris/Benson Area  at Sartell</a></td>
-<td>February 17, 2026</td>
+<td>Feb. 17, 2026</td>
 </tr>
 </tbody></table></div></div>`;
   container.appendChild(wrap_g_most_saves);
@@ -515,70 +515,70 @@
 <td>Eastview</td>
 <td>44</td>
 <td><a href="https://www.legacy.hockey/game/show/44771475?subseason=948428" target="_blank" style="color:#162747;text-decoration:none" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">Farmington at Eastview</a></td>
-<td>January 13, 2026</td>
+<td>Jan. 13, 2026</td>
 </tr>
 <tr class="even">
 <td><a href="https://www.legacy.hockey/roster_players/77720846" target="_blank" style="color:#162747;text-decoration:none" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">Dax Krech</a></td>
 <td>North Shore</td>
 <td>43</td>
 <td><a href="https://www.legacy.hockey/game/show/44771697?subseason=948428" target="_blank" style="color:#162747;text-decoration:none" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">Moose Lake Area at North Shore</a></td>
-<td>January 19, 2026</td>
+<td>Jan. 19, 2026</td>
 </tr>
 <tr class="odd">
 <td><a href="https://www.legacy.hockey/roster_players/77699341" target="_blank" style="color:#162747;text-decoration:none" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">Blayne Kelley</a></td>
 <td><a href="http://www.legacy.hockey/page/show/9113380-conference-standings-2025-26-" target="_blank" style="color:#162747;text-decoration:none" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">Greenway</a></td>
 <td>41</td>
 <td><a href="https://www.legacy.hockey/game/show/44770886?subseason=948428" target="_blank" style="color:#162747;text-decoration:none" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">Greenway at Red Wing</a></td>
-<td>November 21, 2025</td>
+<td>Nov. 21, 2025</td>
 </tr>
 <tr class="even">
 <td><a href="https://www.legacy.hockey/roster_players/77699406" target="_blank" style="color:#162747;text-decoration:none" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">William Pocrnich</a></td>
 <td>Proctor</td>
 <td>41</td>
 <td><a href="https://www.legacy.hockey/game/show/44769895?subseason=948428" target="_blank" style="color:#162747;text-decoration:none" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">Two Rivers at Proctor</a></td>
-<td>November 28, 2025</td>
+<td>Nov. 28, 2025</td>
 </tr>
 <tr class="odd">
 <td><a href="https://www.legacy.hockey/roster_players/77677270" target="_blank" style="color:#162747;text-decoration:none" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">Jackson Chesak</a></td>
 <td>Mahtomedi</td>
 <td>41</td>
 <td><a href="https://www.legacy.hockey/game/show/44770920?subseason=948428" target="_blank" style="color:#162747;text-decoration:none" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">East Grand Forks at Mahtomedi</a></td>
-<td>December 13, 2025</td>
+<td>Dec. 13, 2025</td>
 </tr>
 <tr class="even">
 <td><a href="https://www.legacy.hockey/roster_players/77651747" target="_blank" style="color:#162747;text-decoration:none" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">Sam Suja</a></td>
 <td>Northern Lakes</td>
 <td>40</td>
 <td><a href="https://www.legacy.hockey/game/show/44770948?subseason=948428" target="_blank" style="color:#162747;text-decoration:none" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">Bemidji at Northern Lakes</a></td>
-<td>January 20, 2026</td>
+<td>Jan. 20, 2026</td>
 </tr>
 <tr class="odd">
 <td><a href="https://www.legacy.hockey/roster_players/77737328" target="_blank" style="color:#162747;text-decoration:none" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">Everett Hay</a></td>
 <td><a href="http://www.legacy.hockey/page/show/9113380-conference-standings-2025-26-" target="_blank" style="color:#162747;text-decoration:none" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">Simley</a></td>
 <td>38</td>
 <td><a href="https://www.legacy.hockey/game/show/44771095?subseason=948428" target="_blank" style="color:#162747;text-decoration:none" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">Simley at Tartan</a></td>
-<td>December 18, 2025</td>
+<td>Dec. 18, 2025</td>
 </tr>
 <tr class="even">
 <td><a href="https://www.legacy.hockey/roster_players/77690257" target="_blank" style="color:#162747;text-decoration:none" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">Gavin Bajda</a></td>
 <td>Stillwater</td>
 <td>38</td>
 <td><a href="https://www.legacy.hockey/game/show/44771617?subseason=948428" target="_blank" style="color:#162747;text-decoration:none" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">White Bear Lake at Stillwater</a></td>
-<td>December 31, 2025</td>
+<td>Dec. 31, 2025</td>
 </tr>
 <tr class="odd">
 <td><a href="https://www.legacy.hockey/roster_players/77723135" target="_blank" style="color:#162747;text-decoration:none" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">Zachary Schnabel</a></td>
 <td><a href="http://www.legacy.hockey/page/show/9113380-conference-standings-2025-26-" target="_blank" style="color:#162747;text-decoration:none" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">Forest Lake</a></td>
 <td>37</td>
 <td><a href="https://www.legacy.hockey/game/show/44770763?subseason=948428" target="_blank" style="color:#162747;text-decoration:none" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">Forest Lake at St. Michael-Albertville</a></td>
-<td>November 29, 2025</td>
+<td>Nov. 29, 2025</td>
 </tr>
 <tr class="even">
 <td><a href="https://www.legacy.hockey/roster_players/77728298" target="_blank" style="color:#162747;text-decoration:none" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">David Isaacson</a></td>
 <td><a href="http://www.legacy.hockey/page/show/9113380-conference-standings-2025-26-" target="_blank" style="color:#162747;text-decoration:none" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">Lakeville North</a></td>
 <td>37</td>
 <td><a href="https://www.legacy.hockey/game/show/44771456?subseason=948428" target="_blank" style="color:#162747;text-decoration:none" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">Lakeville North at Eastview</a></td>
-<td>February 5, 2026</td>
+<td>Feb. 5, 2026</td>
 </tr>
 </tbody></table></div></div>`;
   container.appendChild(wrap_g_most_shutout_saves);
@@ -605,77 +605,77 @@
 <td>Faribault</td>
 <td>88</td>
 <td><a href="https://www.legacy.hockey/game/show/44770236?subseason=948428" target="_blank" style="color:#162747;text-decoration:none" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">Northfield at Faribault</a></td>
-<td>February 7, 2026</td>
+<td>Feb. 7, 2026</td>
 </tr>
 <tr class="even">
 <td><a href="https://www.legacy.hockey/roster_players/77719613" target="_blank" style="color:#162747;text-decoration:none" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">Dylan Slama</a></td>
 <td><a href="http://www.legacy.hockey/page/show/9113380-conference-standings-2025-26-" target="_blank" style="color:#162747;text-decoration:none" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">Moose Lake Area</a></td>
 <td>80</td>
 <td><a href="https://www.legacy.hockey/game/show/44771701?subseason=948428" target="_blank" style="color:#162747;text-decoration:none" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">Moose Lake Area at International Falls</a></td>
-<td>February 5, 2026</td>
+<td>Feb. 5, 2026</td>
 </tr>
 <tr class="odd">
 <td><a href="https://www.legacy.hockey/roster_players/77686515" target="_blank" style="color:#162747;text-decoration:none" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">Dane Price</a></td>
 <td>Mora/Milaca</td>
 <td>76</td>
 <td><a href="https://www.legacy.hockey/game/show/44770684?subseason=948428" target="_blank" style="color:#162747;text-decoration:none" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">International Falls at Mora/Milaca</a></td>
-<td>December 6, 2025</td>
+<td>Dec. 6, 2025</td>
 </tr>
 <tr class="even">
 <td><a href="https://www.legacy.hockey/roster_players/77737334" target="_blank" style="color:#162747;text-decoration:none" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">Owen Unglesbee</a></td>
 <td>Simley</td>
 <td>76</td>
 <td><a href="https://www.legacy.hockey/game/show/44771029?subseason=948428" target="_blank" style="color:#162747;text-decoration:none" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">Mahtomedi at Simley</a></td>
-<td>February 5, 2026</td>
+<td>Feb. 5, 2026</td>
 </tr>
 <tr class="odd">
 <td><a href="https://www.legacy.hockey/roster_players/77737302" target="_blank" style="color:#162747;text-decoration:none" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">CJ Callan</a></td>
 <td><a href="http://www.legacy.hockey/page/show/9113380-conference-standings-2025-26-" target="_blank" style="color:#162747;text-decoration:none" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">Faribault</a></td>
 <td>75</td>
 <td><a href="https://www.legacy.hockey/game/show/44770185?subseason=948428" target="_blank" style="color:#162747;text-decoration:none" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">Faribault at Rochester Century/John Marshall</a></td>
-<td>January 20, 2026</td>
+<td>Jan. 20, 2026</td>
 </tr>
 <tr class="even">
 <td><a href="https://www.legacy.hockey/roster_players/77737302" target="_blank" style="color:#162747;text-decoration:none" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">CJ Callan</a></td>
 <td>Faribault</td>
 <td>74</td>
 <td><a href="https://www.legacy.hockey/game/show/44770184?subseason=948428" target="_blank" style="color:#162747;text-decoration:none" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">Rochester Mayo at Faribault</a></td>
-<td>December 6, 2025</td>
+<td>Dec. 6, 2025</td>
 </tr>
 <tr class="odd">
 <td><a href="https://www.legacy.hockey/roster_players/77718456" target="_blank" style="color:#162747;text-decoration:none" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">Brody Manning</a></td>
 <td>St. Paul Academy</td>
 <td>73</td>
 <td><a href="https://www.legacy.hockey/game/show/44770606?subseason=948428" target="_blank" style="color:#162747;text-decoration:none" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">Breck at St. Paul Academy</a></td>
-<td>November 20, 2025</td>
+<td>Nov. 20, 2025</td>
 </tr>
 <tr class="even">
 <td><a href="https://www.legacy.hockey/roster_players/77736632" target="_blank" style="color:#162747;text-decoration:none" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">Brookston Hildebrandt</a></td>
 <td><a href="http://www.legacy.hockey/page/show/9113380-conference-standings-2025-26-" target="_blank" style="color:#162747;text-decoration:none" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">Bagley/Fosston</a></td>
 <td>73</td>
 <td><a href="https://www.legacy.hockey/game/show/44770092?subseason=948428" target="_blank" style="color:#162747;text-decoration:none" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">Bagley/Fosston at International Falls</a></td>
-<td>December 31, 2025</td>
+<td>Dec. 31, 2025</td>
 </tr>
 <tr class="odd">
 <td><a href="https://www.legacy.hockey/roster_players/77719613" target="_blank" style="color:#162747;text-decoration:none" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">Dylan Slama</a></td>
 <td>Moose Lake Area</td>
 <td>73</td>
 <td><a href="https://www.legacy.hockey/game/show/44771692?subseason=948428" target="_blank" style="color:#162747;text-decoration:none" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">International Falls at Moose Lake Area</a></td>
-<td>January 26, 2026</td>
+<td>Jan. 26, 2026</td>
 </tr>
 <tr class="even">
 <td><a href="https://www.legacy.hockey/roster_players/77737328" target="_blank" style="color:#162747;text-decoration:none" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">Everett Hay</a></td>
 <td>Simley</td>
 <td>72</td>
 <td><a href="https://www.legacy.hockey/game/show/44771032?subseason=948428" target="_blank" style="color:#162747;text-decoration:none" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">St. Thomas Academy at Simley</a></td>
-<td>November 22, 2025</td>
+<td>Nov. 22, 2025</td>
 </tr>
 <tr class="odd">
 <td><a href="https://www.legacy.hockey/roster_players/77664781" target="_blank" style="color:#162747;text-decoration:none" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">Brody Pederson</a></td>
 <td><a href="http://www.legacy.hockey/page/show/9113380-conference-standings-2025-26-" target="_blank" style="color:#162747;text-decoration:none" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">Worthington</a></td>
 <td>72</td>
 <td><a href="https://www.legacy.hockey/game/show/44770361?subseason=948428" target="_blank" style="color:#162747;text-decoration:none" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">Worthington at Minnesota River</a></td>
-<td>January 15, 2026</td>
+<td>Jan. 15, 2026</td>
 </tr>
 </tbody></table></div></div>`;
   container.appendChild(wrap_g_most_shots_faced);
