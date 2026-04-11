@@ -165,4 +165,8 @@
   var a=window._sglAnchor;
   if(a&&a.parentNode){a.parentNode.insertBefore(container,a.nextSibling);}
   else{document.body.appendChild(container);}
+  if(typeof sorttable!=='undefined'){
+    var tbls=container.querySelectorAll('table.sortable');
+    for(var i=0;i<tbls.length;i++){sorttable.makeSortable(tbls[i]);}
+  }
 })();
