@@ -412,12 +412,23 @@ getKey() ? showMain() : showSetup();
 
 // ── FETCH ──
 async function fetchBoxscore(url) {
-  const proxy = `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`;
-  const r = await fetch(proxy);
-  if (!r.ok) throw new Error(`Could not fetch page (${r.status})`);
-  const d = await r.json();
-  if (!d.contents) throw new Error('Empty response from page');
-  return d.contents;
+  const encoded = encodeURIComponent(url);
+  const proxies = [
+    ['allorigins-raw', `https://api.allorigins.win/raw?url=${encoded}`, false],
+    ['allorigins-get', `https://api.allorigins.win/get?url=${encoded}`, true],
+    ['corsproxy', `https://corsproxy.io/?url=${encoded}`, false],
+    ['thingproxy', `https://thingproxy.freeboard.io/fetch/${url}`, false],
+  ];
+  for (const [name, proxyUrl, isJson] of proxies) {
+    try {
+      console.log('Trying proxy:', name);
+      const r = await fetch(proxyUrl);
+      if (!r.ok) { console.warn(name, 'HTTP', r.status); continue; }
+      const text = isJson ? (await r.json()).contents : await r.text();
+      if (text && text.length > 500) return text;
+    } catch(e) { console.warn(name, 'failed:', e.message); }
+  }
+  throw new Error('Could not load the boxscore page. All proxies failed — please try again shortly.');
 }
 
 // ── PARSE ──
