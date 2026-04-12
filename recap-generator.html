@@ -378,7 +378,7 @@ RULES:
 - For overtime: use "overtime" for one OT period, "double overtime" for two OT periods, "triple overtime" for three, etc. The game data will specify how many OT periods were played.
 - Always use the exact venue name provided in the game data. Never substitute a different or more familiar arena name.
 - Do not invent context, records, or historical comparisons not present in the data. Stick strictly to what is provided.
-- Do NOT use team nicknames (e.g. Spuds, Skippers, Pioneers) — they are not provided in the data and you will get them wrong. Use only the team name as given.
+- Team nicknames will be provided in the data when available. Use them to alternate with the school name to avoid repetition. If no nickname is provided, use only the school name — never guess or invent a nickname.
 - Keep the recap between 200-300 words.
 
 TEAM RECORDS (if provided):
@@ -680,6 +680,33 @@ async function fetchTeamRecords(gameData) {
   return records;
 }
 
+// Fetch team nicknames from team pages
+async function fetchTeamNicknames(gameData) {
+  const nicknames = {};
+  const teams = [
+    { name: gameData.awayTeam, nodeId: gameData.awayNodeId },
+    { name: gameData.homeTeam, nodeId: gameData.homeNodeId }
+  ];
+  await Promise.all(teams.map(async team => {
+    if (!team.nodeId) return;
+    try {
+      const url = `https://www.legacy.hockey/page/show/${team.nodeId}-?subseason=${SUBSEASON}`;
+      const html = await fetchViaProxy(url);
+      if (!html) return;
+      const doc = new DOMParser().parseFromString(html, 'text/html');
+      // Find the Team Information table and look for Nickname row
+      doc.querySelectorAll('table.dataTable tbody tr').forEach(row => {
+        const cells = row.querySelectorAll('td');
+        if (cells.length >= 2 && cells[0]?.textContent?.trim() === 'Nickname:') {
+          nicknames[team.name] = cells[1]?.textContent?.trim();
+        }
+      });
+    } catch(e) { console.warn('fetchTeamNicknames failed for', team.name, e.message); }
+  }));
+  console.log('Nicknames fetched:', nicknames);
+  return nicknames;
+}
+
 // Parse state rankings from homepage Ajax tabs
 async function fetchStateRankings(teamNames) {
   const rankings = {};
@@ -791,16 +818,33 @@ function formatGameData(g, enrichment) {
   const L = [];
   L.push(`GAME: ${g.awayTeam} at ${g.homeTeam}`);
   L.push(`DATE: ${g.date}`);
-  // Strip city from venue for in-story use (city is already in dateline)
-  // e.g. "Grand Casino Arena, St. Paul" → "Grand Casino Arena"
-  const venueForStory = g.location.includes(',') 
-    ? g.location.split(',')[0].trim() 
+  // Extract arena name and city from location
+  // Format can be: "Grand Casino Arena, St. Paul"
+  // or: "State Class 2A Tournament - Championship | Grand Casino Arena, St. Paul"
+  let arenaFull = g.location.includes('|')
+    ? g.location.split('|').pop().trim()
     : g.location;
-  L.push(`VENUE (use this exact name in the story, without the city): ${venueForStory}`);
-  L.push(`DATELINE CITY (extract city for ALL-CAPS dateline at start): ${g.location}`);
+  // arenaFull is now "Grand Casino Arena, St. Paul"
+  const venueForStory = arenaFull.includes(',')
+    ? arenaFull.split(',')[0].trim()
+    : arenaFull;
+  L.push(`VENUE (use this exact name in the story, do not add city): ${venueForStory}`);
+  L.push(`DATELINE CITY (use for ALL-CAPS dateline at very start of recap): ${arenaFull}`);
   const otNote = g.otLabel ? ` — decided in ${g.otLabel}` : '';
   L.push(`FINAL: ${g.awayTeam} ${g.awayScore} - ${g.homeScore} ${g.homeTeam} (${g.status}${otNote})`);
   if (g.otLabel) L.push(`OVERTIME PERIODS PLAYED: ${g.otPeriods} (${g.otLabel})`);
+
+  // Enrichment: nicknames
+  if (enrichment?.nicknames) {
+    const awayNick = enrichment.nicknames[g.awayTeam];
+    const homeNick = enrichment.nicknames[g.homeTeam];
+    if (awayNick || homeNick) {
+      L.push('');
+      L.push('TEAM NICKNAMES (alternate with school name to avoid repetition):');
+      if (awayNick) L.push(`  ${g.awayTeam}: ${awayNick}`);
+      if (homeNick) L.push(`  ${g.homeTeam}: ${homeNick}`);
+    }
+  }
 
   // Enrichment: records
   if (enrichment?.records) {
@@ -884,12 +928,13 @@ async function generateRecap() {
     // Fetch enrichment data in parallel
     setLoading(true, 'Fetching records, rankings & leaderboard data...');
     const teamNames = [gd.awayTeam, gd.homeTeam];
-    const [records, rankings, leaderboardNotes] = await Promise.all([
+    const [records, rankings, leaderboardNotes, nicknames] = await Promise.all([
       fetchTeamRecords(gd),
       fetchStateRankings(teamNames),
-      fetchLeaderboardContext(gd)
+      fetchLeaderboardContext(gd),
+      fetchTeamNicknames(gd)
     ]);
-    const enrichment = { records, rankings, leaderboardNotes };
+    const enrichment = { records, rankings, leaderboardNotes, nicknames };
 
     const text = formatGameData(gd, enrichment);
     lastData = text;
