@@ -378,7 +378,7 @@ RULES:
 - For overtime: use "overtime" for one OT period, "double overtime" for two OT periods, "triple overtime" for three, etc. The game data will specify how many OT periods were played.
 - Always use the exact venue name provided in the game data. Never substitute a different or more familiar arena name.
 - Do not invent context, records, historical comparisons, or superlatives not present in the data.
-- When listing shots on goal, always put the higher number first. Example: "Minnetonka outshot Moorhead 35-25" not "Moorhead outshot Minnetonka 25-35."
+- When listing shots on goal, ALWAYS name the team with MORE shots first. The team with more shots "outshot" the other. Example: if Team A had 29 shots and Team B had 38 shots, write "Team B outshot Team A 38-29." Never list the lower number first.
 - The opening sentence must always state the winner and the final score first. Never open with a deficit, lead, or any other numbers before the final score. Wrong: "North Shore rallied from a 2-1 deficit to defeat Ely 3-2..." Right: "North Shore defeated Ely 3-2 in overtime... rallying from a two-goal deficit." If referencing a deficit or lead before the score has appeared, write it out in words rather than numbers (e.g. "two-goal deficit" not "2-1 deficit").
 - Pronoun usage: use "its" when referring to a team by school name (e.g. "Moorhead won its third straight"), and "their" when referring to a team by nickname (e.g. "the Spuds won their third straight").
 - When mentioning goalies, always double-check team attribution. The goalie data clearly labels which team each goalie plays for — use that label. Never assign a goalie to the wrong team.
@@ -914,6 +914,18 @@ function formatGameData(g, enrichment) {
     L.push('');
   };
   addG(g.goalies.away, g.awayTeam); addG(g.goalies.home, g.homeTeam);
+
+  // Add explicit shots summary so AI gets the comparison right
+  const awaySA = g.goalies.home.reduce((sum, gl) => sum + gl.sa, 0);
+  const homeSA = g.goalies.away.reduce((sum, gl) => sum + gl.sa, 0);
+  if (awaySA > 0 || homeSA > 0) {
+    const moreTeam = awaySA >= homeSA ? g.awayTeam : g.homeTeam;
+    const lessTeam = awaySA >= homeSA ? g.homeTeam : g.awayTeam;
+    const moreShots = Math.max(awaySA, homeSA);
+    const lessShots = Math.min(awaySA, homeSA);
+    L.push(`SHOTS ON GOAL: ${moreTeam} outshot ${lessTeam} ${moreShots}-${lessShots}`);
+    L.push('');
+  }
   return L.join('\n');
 }
 
