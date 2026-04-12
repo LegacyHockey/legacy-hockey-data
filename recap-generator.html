@@ -352,6 +352,11 @@ const KEY_STORE = "lh_recap_api_key";
 const STYLE_PROMPT = `You are a hockey writer for Legacy.Hockey, a site covering MSHSL (Minnesota State High School League) hockey.
 Your job is to write a concise, factual, and engaging game recap in 3-4 paragraphs.
 
+DATELINE:
+- Always begin the recap with a dateline: the city name in ALL CAPS followed by a long dash.
+- Extract the city from the venue field in the game data. For example if the venue is "Grand Casino Arena, St. Paul" the dateline is "ST. PAUL —"
+- The dateline is the very first thing in the recap, immediately before the opening sentence. Example: "ST. PAUL — Moorhead captured..."
+
 TONE & VOICE:
 - Write like a knowledgeable beat reporter, not a cheerleader.
 - Be specific — use player names, exact stats, and period-by-period context.
@@ -369,8 +374,28 @@ RULES:
 - If a player scored 2+ goals, call that out specifically.
 - If a goalie faced 30+ shots, mention it.
 - If a team scored 3+ goals in a single period, flag it as a dominant period.
-- Do not invent stats not provided. Stick to the data.
-- Keep the recap between 200-300 words.`;
+- For overtime: use "overtime" for one OT period, "double overtime" for two OT periods, "triple overtime" for three, etc. The game data will specify how many OT periods were played.
+- Always use the exact venue name provided in the game data. Never substitute a different or more familiar arena name.
+- Do not invent context, records, or historical comparisons not present in the data. Stick strictly to what is provided.
+- Keep the recap between 200-300 words.
+
+TEAM RECORDS (if provided):
+- Include each team's record (W-L-T) in the second or third paragraph — never the first.
+- Always use W-L-T format including ties even if 0. Example: "(14-8-2)" or "(22-5-0)"
+
+STATE RANKINGS (if provided):
+- Reference rankings naturally in the story. Example: "No. 3-ranked Moorhead" or "No. 12 Minnetonka"
+- Include teams from both the Top 10 and Next 10 if they appear in the data.
+- If a team is unranked, do not reference rankings for that team.
+
+PLAYOFF SEEDS (if provided):
+- For section/state tournament games, reference seeds naturally. Examples: "Minnetonka, the No. 1 seed..." or "Moorhead, seeded No. 2..."
+- Only include seeds if the data explicitly provides them.
+
+SINGLE-GAME LEADERBOARD CONTEXT (if provided):
+- If a player's performance ranks on the season leaderboard, weave that in naturally.
+- Example: "Arnold's 31 saves ranks among the top single-game performances by a goalie this season."
+- Keep leaderboard references brief — one sentence maximum per player.`;
 
 // ── KEY MANAGEMENT ──
 const getKey = () => localStorage.getItem(KEY_STORE) || '';
@@ -451,6 +476,16 @@ function parseBoxscore(html) {
     if (cells.length > 1) g.periods.push(cells);
   });
 
+  // Count OT periods from header row
+  const periodHeaders = Array.from(doc.querySelectorAll('.line_score_v2 thead th')).map(h => h.textContent.trim());
+  const otPeriods = periodHeaders.filter(h => h.startsWith('OT')).length;
+  g.otPeriods = otPeriods;
+  if (otPeriods === 0) g.otLabel = '';
+  else if (otPeriods === 1) g.otLabel = 'overtime';
+  else if (otPeriods === 2) g.otLabel = 'double overtime';
+  else if (otPeriods === 3) g.otLabel = 'triple overtime';
+  else g.otLabel = otPeriods + '-overtime';
+
   doc.querySelectorAll('.scoring_summary li.scoring_info').forEach(item => {
     const clock = item.querySelector('.game_clock')?.textContent?.trim();
     const team = item.querySelector('.team_name')?.textContent?.trim();
@@ -490,12 +525,216 @@ function parseBoxscore(html) {
   return g;
 }
 
+// ── ENRICHMENT DATA FETCHING ──
+
+async function fetchViaProxy(url) {
+  const encoded = encodeURIComponent(url);
+  const proxies = [
+    ['allorigins-raw', `https://api.allorigins.win/raw?url=${encoded}`, false],
+    ['allorigins-get', `https://api.allorigins.win/get?url=${encoded}`, true],
+    ['corsproxy', `https://corsproxy.io/?url=${encoded}`, false],
+  ];
+  for (const [name, proxyUrl, isJson] of proxies) {
+    try {
+      const r = await fetch(proxyUrl);
+      if (!r.ok) continue;
+      const text = isJson ? (await r.json()).contents : await r.text();
+      if (text && text.length > 200) return text;
+    } catch(e) { console.warn('Enrichment proxy', name, 'failed:', e.message); }
+  }
+  return null;
+}
+
+// Parse team records from conference standings Ajax endpoint
+async function fetchTeamRecords(teamNames) {
+  const records = {};
+  try {
+    const url = `https://www.legacy.hockey/page_element/ajax/661234226?width_percentage=100&page_node_id=9113380&subseason=${SUBSEASON}`;
+    const html = await fetchViaProxy(url);
+    if (!html) return records;
+
+    const doc = new DOMParser().parseFromString(html, 'text/html');
+    doc.querySelectorAll('table tbody tr').forEach(row => {
+      const cells = row.querySelectorAll('td');
+      if (cells.length < 4) return;
+      const name = cells[0]?.textContent?.trim();
+      // Look for Overall column — typically has W-L-T format
+      // Find the cell that contains a record pattern like "14-8-2"
+      for (let i = 1; i < cells.length; i++) {
+        const text = cells[i]?.textContent?.trim();
+        if (/^\d+-\d+-\d+$/.test(text)) {
+          // Match against team names (fuzzy — check if team name contains or is contained in cell name)
+          for (const teamName of teamNames) {
+            if (name && (name.toLowerCase().includes(teamName.toLowerCase()) ||
+                teamName.toLowerCase().includes(name.toLowerCase()))) {
+              records[teamName] = text;
+              break;
+            }
+          }
+          break;
+        }
+      }
+    });
+    console.log('Records fetched:', records);
+  } catch(e) { console.warn('fetchTeamRecords failed:', e.message); }
+  return records;
+}
+
+// Parse state rankings from homepage Ajax tabs
+async function fetchStateRankings(teamNames) {
+  const rankings = {};
+  try {
+    // Fetch both Class 2A and Class 1A rankings
+    const urls = [
+      `https://www.legacy.hockey/layout_container/show_layout_tab?layout_container_id=89666220&page_node_id=2445160&tab_element_id=271925`,
+      `https://www.legacy.hockey/layout_container/show_layout_tab?layout_container_id=89666221&page_node_id=2445160&tab_element_id=271925`
+    ];
+
+    for (const url of urls) {
+      const html = await fetchViaProxy(url);
+      if (!html) continue;
+
+      const doc = new DOMParser().parseFromString(html, 'text/html');
+      // Rankings use .rankingsElement .statTable or similar
+      doc.querySelectorAll('.statTable tbody tr, table tbody tr').forEach(row => {
+        const cells = row.querySelectorAll('td');
+        if (cells.length < 2) return;
+        // First cell is rank number, find team name cell
+        const rankText = cells[0]?.textContent?.trim();
+        const rank = parseInt(rankText);
+        if (!rank || rank > 20) return;
+
+        // Team name is usually in a cell with a link or text
+        for (let i = 1; i < cells.length; i++) {
+          const cellText = cells[i]?.textContent?.trim();
+          if (cellText && cellText.length > 2 && !/^\d+$/.test(cellText)) {
+            for (const teamName of teamNames) {
+              if (cellText.toLowerCase().includes(teamName.toLowerCase()) ||
+                  teamName.toLowerCase().includes(cellText.toLowerCase())) {
+                rankings[teamName] = rank;
+                break;
+              }
+            }
+            break;
+          }
+        }
+      });
+    }
+    console.log('Rankings fetched:', rankings);
+  } catch(e) { console.warn('fetchStateRankings failed:', e.message); }
+  return rankings;
+}
+
+// Parse single-game leaders from GitHub JS file
+async function fetchLeaderboardContext(gameData) {
+  const notes = [];
+  try {
+    const url = 'https://raw.githubusercontent.com/LegacyHockey/legacy-hockey-data/refs/heads/main/single-game-leaders.js';
+    const js = await fetchViaProxy(url);
+    if (!js) return notes;
+
+    // Extract table data from the JS HTML string
+    const doc = new DOMParser().parseFromString(js, 'text/html');
+    const tables = doc.querySelectorAll('table');
+
+    tables.forEach(table => {
+      // Get section header (Most Goals, Most Assists, etc.)
+      let sectionName = '';
+      let el = table.closest('div')?.previousElementSibling;
+      while (el) {
+        if (el.tagName === 'H4') { sectionName = el.textContent.trim(); break; }
+        el = el.previousElementSibling;
+      }
+      if (!sectionName) return;
+
+      const rows = table.querySelectorAll('tbody tr');
+      rows.forEach((row, idx) => {
+        const cells = row.querySelectorAll('td');
+        if (cells.length < 3) return;
+        const playerName = cells[0]?.textContent?.trim();
+        const school = cells[1]?.textContent?.trim();
+        const statValue = parseInt(cells[2]?.textContent?.trim());
+
+        // Check if this player appears in today's game
+        const allSkaters = [...gameData.skaters.away, ...gameData.skaters.home];
+        const allGoalies = [...gameData.goalies.away, ...gameData.goalies.home];
+        const allPlayers = [...allSkaters, ...allGoalies];
+
+        for (const player of allPlayers) {
+          const pName = player.name?.toLowerCase() || '';
+          const lbName = playerName?.toLowerCase() || '';
+          // Match on last name at minimum
+          const lastName = pName.split(' ').pop();
+          const lbLastName = lbName.split(' ').pop();
+
+          if (lastName && lbLastName && lastName === lbLastName &&
+              (pName.includes(lbName.split(' ')[0]) || lbName.includes(pName.split(' ')[0]))) {
+
+            // Check if their game performance is comparable to leaderboard
+            let gameValue = 0;
+            if (sectionName.includes('Goals') && player.g) gameValue = player.g;
+            else if (sectionName.includes('Assists') && player.a) gameValue = player.a;
+            else if (sectionName.includes('Points') && player.pts) gameValue = player.pts;
+            else if (sectionName.includes('Saves') && player.sv) gameValue = player.sv;
+
+            if (gameValue > 0 && gameValue >= statValue) {
+              const rank = idx + 1;
+              if (rank <= 10) {
+                notes.push(`${playerName} (${school}): ${gameValue} ${sectionName.toLowerCase()} today ranks No. ${rank} on the season leaderboard`);
+              }
+            }
+            break;
+          }
+        }
+      });
+    });
+    console.log('Leaderboard notes:', notes);
+  } catch(e) { console.warn('fetchLeaderboardContext failed:', e.message); }
+  return notes;
+}
+
 // ── FORMAT ──
-function formatGameData(g) {
+function formatGameData(g, enrichment) {
   const L = [];
   L.push(`GAME: ${g.awayTeam} at ${g.homeTeam}`);
-  L.push(`DATE: ${g.date}  |  VENUE: ${g.location}`);
-  L.push(`FINAL: ${g.awayTeam} ${g.awayScore} - ${g.homeScore} ${g.homeTeam} (${g.status})`);
+  L.push(`DATE: ${g.date}`);
+  L.push(`VENUE (use this exact name): ${g.location}`);
+  const otNote = g.otLabel ? ` — decided in ${g.otLabel}` : '';
+  L.push(`FINAL: ${g.awayTeam} ${g.awayScore} - ${g.homeScore} ${g.homeTeam} (${g.status}${otNote})`);
+  if (g.otLabel) L.push(`OVERTIME PERIODS PLAYED: ${g.otPeriods} (${g.otLabel})`);
+
+  // Enrichment: records
+  if (enrichment?.records) {
+    const awayRec = enrichment.records[g.awayTeam];
+    const homeRec = enrichment.records[g.homeTeam];
+    if (awayRec || homeRec) {
+      L.push('');
+      L.push('TEAM RECORDS (W-L-T, include in 2nd or 3rd paragraph):');
+      if (awayRec) L.push(`  ${g.awayTeam}: ${awayRec}`);
+      if (homeRec) L.push(`  ${g.homeTeam}: ${homeRec}`);
+    }
+  }
+
+  // Enrichment: rankings
+  if (enrichment?.rankings) {
+    const awayRank = enrichment.rankings[g.awayTeam];
+    const homeRank = enrichment.rankings[g.homeTeam];
+    if (awayRank || homeRank) {
+      L.push('');
+      L.push('STATE RANKINGS (reference naturally in story):');
+      if (awayRank) L.push(`  ${g.awayTeam}: No. ${awayRank} in state rankings`);
+      if (homeRank) L.push(`  ${g.homeTeam}: No. ${homeRank} in state rankings`);
+      if (!awayRank) L.push(`  ${g.awayTeam}: unranked`);
+      if (!homeRank) L.push(`  ${g.homeTeam}: unranked`);
+    }
+  }
+
+  // Enrichment: leaderboard context
+  if (enrichment?.leaderboardNotes?.length) {
+    L.push('');
+    L.push('SINGLE-GAME LEADERBOARD CONTEXT (weave in naturally if relevant):');
+    enrichment.leaderboardNotes.forEach(note => L.push(`  - ${note}`));
+  }
   L.push('');
   if (g.periods.length) { L.push('PERIOD SCORES:'); g.periods.forEach(r => L.push('  ' + r.join('  '))); L.push(''); }
   if (g.scoring.length) { L.push('SCORING:'); g.scoring.forEach(s => L.push(`  ${s.clock} ${s.team}: ${s.details} (${s.sa}-${s.sh})`)); L.push(''); }
@@ -535,7 +774,18 @@ async function generateRecap() {
     const html = await fetchBoxscore(url);
     setLoading(true, 'Parsing game data...');
     const gd = parseBoxscore(html);
-    const text = formatGameData(gd);
+
+    // Fetch enrichment data in parallel
+    setLoading(true, 'Fetching records, rankings & leaderboard data...');
+    const teamNames = [gd.awayTeam, gd.homeTeam];
+    const [records, rankings, leaderboardNotes] = await Promise.all([
+      fetchTeamRecords(teamNames),
+      fetchStateRankings(teamNames),
+      fetchLeaderboardContext(gd)
+    ]);
+    const enrichment = { records, rankings, leaderboardNotes };
+
+    const text = formatGameData(gd, enrichment);
     lastData = text;
     setLoading(true, 'Generating recap with AI...');
     const recap = await callClaude(text);
