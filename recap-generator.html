@@ -479,24 +479,30 @@ function parseBoxscore(html) {
     awayNodeId: null, homeNodeId: null
   };
 
-  // Extract team page node IDs from links in the boxscore
+  // Extract team page URLs and node IDs from links in the boxscore
   const teamPageLinks = doc.querySelectorAll('a[href*="page/show"]');
   const awayLower = g.awayTeam.toLowerCase();
   const homeLower = g.homeTeam.toLowerCase();
+  g.awayPageUrl = null;
+  g.homePageUrl = null;
   teamPageLinks.forEach(a => {
     const text = a.textContent.trim().toLowerCase();
     const href = a.getAttribute('href') || '';
-    const match = href.match(/page\/show\/(\d+)-/);
+    const match = href.match(/page\/show\/(\d+)-[\w-]+/);
     if (!match) return;
     const nodeId = match[1];
+    // Use full href but strip query string for clean page URL
+    const cleanUrl = 'https://www.legacy.hockey' + href.split('?')[0];
     if (!g.awayNodeId && (text === awayLower || text.includes(awayLower) || awayLower.includes(text)) && text.length > 2) {
       g.awayNodeId = nodeId;
+      g.awayPageUrl = cleanUrl;
     }
     if (!g.homeNodeId && (text === homeLower || text.includes(homeLower) || homeLower.includes(text)) && text.length > 2) {
       g.homeNodeId = nodeId;
+      g.homePageUrl = cleanUrl;
     }
   });
-  console.log('Team node IDs:', g.awayTeam, g.awayNodeId, '/', g.homeTeam, g.homeNodeId);
+  console.log('Team pages:', g.awayTeam, g.awayPageUrl, '/', g.homeTeam, g.homePageUrl);
 
   // Parse line score - only take rows with numeric scores, deduplicate
   const lineScoreTable = doc.querySelector('.line_score_v2');
@@ -659,7 +665,7 @@ async function fetchTeamRecords(gameData) {
   await Promise.all(teams.map(async team => {
     if (!team.nodeId) { console.warn('No node ID for:', team.name); return; }
     try {
-      const url = `https://www.legacy.hockey/standings/show/${team.nodeId}?subseason=${SUBSEASON}`;
+      const url = `https://www.legacy.hockey/standings/show/${team.nodeId}?subseason=${SUBSEASON}&tab=standings`;
       const html = await fetchViaProxy(url);
       if (!html) return;
       const doc = new DOMParser().parseFromString(html, 'text/html');
@@ -684,13 +690,13 @@ async function fetchTeamRecords(gameData) {
 async function fetchTeamNicknames(gameData) {
   const nicknames = {};
   const teams = [
-    { name: gameData.awayTeam, nodeId: gameData.awayNodeId },
-    { name: gameData.homeTeam, nodeId: gameData.homeNodeId }
+    { name: gameData.awayTeam, nodeId: gameData.awayNodeId, pageUrl: gameData.awayPageUrl },
+    { name: gameData.homeTeam, nodeId: gameData.homeNodeId, pageUrl: gameData.homePageUrl }
   ];
   await Promise.all(teams.map(async team => {
-    if (!team.nodeId) return;
+    if (!team.nodeId && !team.pageUrl) return;
     try {
-      const url = `https://www.legacy.hockey/page/show/${team.nodeId}-?subseason=${SUBSEASON}`;
+      const url = team.pageUrl ? `${team.pageUrl}?subseason=${SUBSEASON}` : `https://www.legacy.hockey/page/show/${team.nodeId}?subseason=${SUBSEASON}`;
       const html = await fetchViaProxy(url);
       if (!html) return;
       const doc = new DOMParser().parseFromString(html, 'text/html');
