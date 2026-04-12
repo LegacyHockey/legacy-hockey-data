@@ -354,7 +354,8 @@ Your job is to write a concise, factual, and engaging game recap in 3-4 paragrap
 
 DATELINE:
 - Always begin the recap with a dateline: the city name in ALL CAPS followed by a long dash.
-- Extract the city from the venue field in the game data. For example if the venue is "Grand Casino Arena, St. Paul" the dateline is "ST. PAUL —"
+- The game data includes a DATELINE CITY field — extract the city name from that and put it in ALL CAPS.
+- Example: if DATELINE CITY is "Grand Casino Arena, St. Paul" the dateline is "ST. PAUL —"
 - The dateline is the very first thing in the recap, immediately before the opening sentence. Example: "ST. PAUL — Moorhead captured..."
 
 TONE & VOICE:
@@ -377,6 +378,7 @@ RULES:
 - For overtime: use "overtime" for one OT period, "double overtime" for two OT periods, "triple overtime" for three, etc. The game data will specify how many OT periods were played.
 - Always use the exact venue name provided in the game data. Never substitute a different or more familiar arena name.
 - Do not invent context, records, or historical comparisons not present in the data. Stick strictly to what is provided.
+- Do NOT use team nicknames (e.g. Spuds, Skippers, Pioneers) — they are not provided in the data and you will get them wrong. Use only the team name as given.
 - Keep the recap between 200-300 words.
 
 TEAM RECORDS (if provided):
@@ -789,7 +791,13 @@ function formatGameData(g, enrichment) {
   const L = [];
   L.push(`GAME: ${g.awayTeam} at ${g.homeTeam}`);
   L.push(`DATE: ${g.date}`);
-  L.push(`VENUE (use this exact name): ${g.location}`);
+  // Strip city from venue for in-story use (city is already in dateline)
+  // e.g. "Grand Casino Arena, St. Paul" → "Grand Casino Arena"
+  const venueForStory = g.location.includes(',') 
+    ? g.location.split(',')[0].trim() 
+    : g.location;
+  L.push(`VENUE (use this exact name in the story, without the city): ${venueForStory}`);
+  L.push(`DATELINE CITY (extract city for ALL-CAPS dateline at start): ${g.location}`);
   const otNote = g.otLabel ? ` — decided in ${g.otLabel}` : '';
   L.push(`FINAL: ${g.awayTeam} ${g.awayScore} - ${g.homeScore} ${g.homeTeam} (${g.status}${otNote})`);
   if (g.otLabel) L.push(`OVERTIME PERIODS PLAYED: ${g.otPeriods} (${g.otLabel})`);
