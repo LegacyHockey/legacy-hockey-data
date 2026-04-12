@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Legacy Hockey — AI Recap Generator</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Oswald:wght@400;600;700&family=Source+Serif+4:ital,wght@0,300;0,400;1,300;1,400&display=swap');
+
+  :root {
+    --navy: #000066;
+    --red: #8b191f;
+    --ice: #e8f0f7;
+    --white: #ffffff;
+    --gray: #4a4a4a;
+    --light: #f0f4f8;
+    --border: #d0d8e0;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Source Serif 4', Georgia, serif;
+    background: var(--ice);
+    color: var(--gray);
+    min-height: 100vh;
+  }
+
+  header {
+    background: var(--navy);
+    padding: 18px 32px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    border-bottom: 4px solid var(--red);
+  }
+
+  header .logo-text {
+    font-family: 'Oswald', sans-serif;
+    color: var(--white);
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+
+  header .logo-text span { color: #7799cc; font-weight: 400; }
+
+  header .tag {
+    margin-left: auto;
+    background: var(--red);
+    color: white;
+    font-family: 'Oswald', sans-serif;
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    padding: 4px 10px;
+    border-radius: 2px;
+  }
+
+  .container { max-width: 820px; margin: 0 auto; padding: 40px 24px; }
+
+  h1 {
+    font-family: 'Oswald', sans-serif;
+    font-size: 28px;
+    font-weight: 600;
+    color: var(--navy);
+    margin-bottom: 6px;
+    letter-spacing: 0.5px;
+  }
+
+  .subtitle { font-size: 15px; color: #6a7a8a; margin-bottom: 32px; font-style: italic; }
+
+  .card {
+    background: var(--white);
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    padding: 28px;
+    margin-bottom: 24px;
+    box-shadow: 0 2px 8px rgba(0,0,50,0.06);
+  }
+
+  label {
+    display: block;
+    font-family: 'Oswald', sans-serif;
+    font-size: 13px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--navy);
+    margin-bottom: 10px;
+  }
+
+  input[type="text"], input[type="password"], textarea {
+    width: 100%;
+    padding: 12px 16px;
+    border: 1.5px solid var(--border);
+    border-radius: 4px;
+    font-family: 'Source Serif 4', Georgia, serif;
+    font-size: 15px;
+    color: var(--gray);
+    background: var(--light);
+    transition: border-color 0.2s;
+    outline: none;
+  }
+
+  input[type="text"]:focus, input[type="password"]:focus, textarea:focus {
+    border-color: var(--navy);
+    background: white;
+  }
+
+  input::placeholder { color: #aab; font-style: italic; }
+
+  .row { display: flex; gap: 12px; align-items: flex-start; }
+  .row input { flex: 1; }
+
+  button {
+    font-family: 'Oswald', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    padding: 13px 24px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.15s;
+    white-space: nowrap;
+  }
+
+  .btn-primary { background: var(--navy); color: white; }
+  .btn-primary:hover:not(:disabled) { background: #000088; }
+  .btn-primary:disabled { background: #99a; cursor: not-allowed; }
+
+  .btn-secondary {
+    background: var(--light);
+    color: var(--navy);
+    border: 1.5px solid var(--border);
+    font-size: 13px;
+    padding: 10px 18px;
+  }
+  .btn-secondary:hover { background: var(--ice); border-color: var(--navy); }
+
+  .btn-copy { background: var(--red); color: white; font-size: 13px; padding: 10px 18px; }
+  .btn-copy:hover { background: #a01f25; }
+
+  .btn-danger {
+    background: none;
+    color: #a04040;
+    border: 1px solid #d0a0a0;
+    font-size: 11px;
+    padding: 6px 12px;
+    letter-spacing: 1px;
+  }
+  .btn-danger:hover { background: #fdf0f0; }
+
+  .msg {
+    margin-top: 14px;
+    padding: 12px 16px;
+    border-radius: 4px;
+    font-size: 14px;
+    display: none;
+  }
+  .msg.loading { display: flex; align-items: center; gap: 10px; background: #e8eef8; color: var(--navy); border: 1px solid #c0cce0; }
+  .msg.error { display: block; background: #fdf0f0; color: var(--red); border: 1px solid #f0c0c0; }
+  .msg.success { display: block; background: #f0fdf0; color: #2a6a2a; border: 1px solid #a0d0a0; }
+
+  .spinner {
+    width: 16px; height: 16px;
+    border: 2px solid #c0cce0;
+    border-top-color: var(--navy);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    flex-shrink: 0;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .screen { display: none; }
+  .screen.visible { display: block; }
+
+  .setup-intro {
+    background: #fffbe6;
+    border: 1px solid #e0d080;
+    border-radius: 4px;
+    padding: 16px 18px;
+    margin-bottom: 20px;
+    font-size: 14px;
+    line-height: 1.7;
+    color: #605020;
+  }
+  .setup-intro strong {
+    font-family: 'Oswald', sans-serif;
+    font-size: 13px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    display: block;
+    margin-bottom: 6px;
+    color: #403010;
+  }
+  .setup-steps { margin: 10px 0 0 16px; font-size: 13px; line-height: 2; }
+
+  .api-bar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 28px;
+    padding: 10px 16px;
+    background: #f0f4f0;
+    border: 1px solid #c0d0c0;
+    border-radius: 4px;
+    font-size: 13px;
+    color: #4a6a4a;
+  }
+  .api-bar .key-label { font-family: 'Oswald', sans-serif; font-size: 11px; letter-spacing: 1px; text-transform: uppercase; }
+  .api-bar .key-preview { font-family: monospace; font-size: 12px; color: #6a8a6a; flex: 1; }
+
+  .result-section { display: none; }
+  .result-section.visible { display: block; }
+
+  .result-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 14px;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .game-title { font-family: 'Oswald', sans-serif; font-size: 16px; color: var(--navy); font-weight: 600; }
+  .result-actions { display: flex; gap: 8px; align-items: center; }
+
+  textarea.recap-output { min-height: 220px; line-height: 1.75; resize: vertical; background: white; border-color: var(--border); }
+
+  .copy-confirm { font-family: 'Oswald', sans-serif; font-size: 12px; letter-spacing: 1px; color: #2a8a2a; display: none; align-items: center; }
+  .copy-confirm.show { display: flex; }
+
+  .divider { height: 1px; background: var(--border); margin: 6px 0 20px; }
+  .note { font-size: 13px; color: #8a9aaa; font-style: italic; margin-top: 10px; }
+  .word-count { font-size: 12px; color: #8a9aaa; font-family: 'Oswald', sans-serif; letter-spacing: 0.5px; margin-top: 6px; text-align: right; }
+  .section-label { font-family: 'Oswald', sans-serif; font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: #8a9aaa; margin-bottom: 14px; }
+
+  details { margin-top: 20px; }
+  summary { font-family: 'Oswald', sans-serif; font-size: 13px; letter-spacing: 1px; text-transform: uppercase; color: #8a9aaa; cursor: pointer; user-select: none; padding: 8px 0; }
+  summary:hover { color: var(--navy); }
+
+  .data-preview {
+    margin-top: 12px;
+    background: var(--light);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 14px 16px;
+    font-family: monospace;
+    font-size: 12px;
+    line-height: 1.6;
+    color: #556;
+    white-space: pre-wrap;
+    max-height: 300px;
+    overflow-y: auto;
+  }
+
+  footer { text-align: center; padding: 24px; font-size: 12px; color: #aab; font-style: italic; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo-text">Legacy Hockey <span>|</span> AI Recap Generator</div>
+  <div class="tag">Internal Tool</div>
+</header>
+
+<div class="container">
+
+  <!-- SETUP SCREEN -->
+  <div id="setupScreen" class="screen">
+    <h1>First-Time Setup</h1>
+    <p class="subtitle">You only need to do this once on this device.</p>
+    <div class="card">
+      <div class="setup-intro">
+        <strong>Before you start</strong>
+        This tool uses the Claude AI API to generate recaps. Each person needs to enter the shared API key once — it saves privately in your browser and is never uploaded to GitHub or anywhere else.
+        <ol class="setup-steps">
+          <li>Get the API key from Loren</li>
+          <li>Paste it in the field below</li>
+          <li>Click Save Key — you're done</li>
+        </ol>
+      </div>
+      <label for="keyInput">Claude API Key</label>
+      <div class="row">
+        <input type="password" id="keyInput" placeholder="sk-ant-api03-..." autocomplete="off" spellcheck="false">
+        <button class="btn-primary" onclick="saveKey()">Save Key</button>
+      </div>
+      <div class="msg error" id="setupError"></div>
+      <div class="msg success" id="setupSuccess"></div>
+      <p class="note">Your key is stored only in this browser on this device. It is never uploaded anywhere.</p>
+    </div>
+  </div>
+
+  <!-- MAIN SCREEN -->
+  <div id="mainScreen" class="screen">
+    <h1>Game Recap Generator</h1>
+    <p class="subtitle">Paste a Legacy.Hockey boxscore URL to generate a draft recap for review and editing.</p>
+
+    <div class="api-bar">
+      <span class="key-label">✓ API Key saved</span>
+      <span class="key-preview" id="keyPreview"></span>
+      <button class="btn-danger" onclick="clearKey()">Change Key</button>
+    </div>
+
+    <div class="card">
+      <label for="urlInput">Boxscore URL</label>
+      <div class="row">
+        <input type="text" id="urlInput" placeholder="https://www.legacy.hockey/game/show/45205875?subseason=948428">
+        <button class="btn-primary" id="generateBtn" onclick="generateRecap()">Generate</button>
+      </div>
+      <div class="msg loading" id="statusLoading">
+        <div class="spinner"></div>
+        <span id="statusText">Fetching boxscore...</span>
+      </div>
+      <div class="msg error" id="statusError"></div>
+      <p class="note">Paste the full URL from any Legacy.Hockey game page.</p>
+    </div>
+
+    <div class="result-section" id="resultSection">
+      <div class="card">
+        <div class="result-header">
+          <div class="game-title" id="gameTitle"></div>
+          <div class="result-actions">
+            <span class="copy-confirm" id="copyConfirm">✓ Copied</span>
+            <button class="btn-copy" onclick="copyRecap()">Copy Recap</button>
+            <button class="btn-secondary" onclick="regenerate()">Regenerate</button>
+          </div>
+        </div>
+        <div class="divider"></div>
+        <div class="section-label">Draft Recap — Review and edit before publishing</div>
+        <textarea class="recap-output" id="recapOutput" oninput="updateWordCount()"></textarea>
+        <div class="word-count" id="wordCount"></div>
+        <details>
+          <summary>View raw game data sent to AI</summary>
+          <div class="data-preview" id="gameDataPreview"></div>
+        </details>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<footer>Legacy Hockey internal tool — AI drafts require human review before publishing.</footer>
+
+<script>
+const SUBSEASON = "948428";
+const KEY_STORE = "lh_recap_api_key";
+
+const STYLE_PROMPT = `You are a hockey writer for Legacy.Hockey, a site covering MSHSL (Minnesota State High School League) hockey.
+Your job is to write a concise, factual, and engaging game recap in 3-4 paragraphs.
+
+TONE & VOICE:
+- Write like a knowledgeable beat reporter, not a cheerleader.
+- Be specific — use player names, exact stats, and period-by-period context.
+- Vary sentence structure. Avoid starting consecutive sentences the same way.
+- Do not use cliches like "finding the back of the net" or "between the pipes."
+- Use active voice. Keep it tight — no filler phrases.
+
+STRUCTURE:
+1. Opening: Lead with the final result, the winning team, and what defined the game. Mention the score.
+2. Middle: Walk through key moments — goals, turning points, standout performances. Mention multi-point players by name.
+3. Closing: Shots on goal totals, notable penalty situations, one sentence of summary context.
+
+RULES:
+- Full name on first reference, last name only after that.
+- If a player scored 2+ goals, call that out specifically.
+- If a goalie faced 30+ shots, mention it.
+- If a team scored 3+ goals in a single period, flag it as a dominant period.
+- Do not invent stats not provided. Stick to the data.
+- Keep the recap between 200-300 words.`;
+
+// ── KEY MANAGEMENT ──
+const getKey = () => localStorage.getItem(KEY_STORE) || '';
+
+function saveKey() {
+  const val = document.getElementById('keyInput').value.trim();
+  if (!val) { setMsg('setupError', 'Please paste your API key.'); return; }
+  if (!val.startsWith('sk-ant-')) { setMsg('setupError', 'That does not look like a valid Claude API key. It should start with sk-ant-'); return; }
+  localStorage.setItem(KEY_STORE, val);
+  document.getElementById('setupError').style.display = 'none';
+  setMsg('setupSuccess', '✓ Key saved! Loading the tool...');
+  setTimeout(showMain, 900);
+}
+
+function clearKey() {
+  if (confirm('Remove your saved API key from this browser?')) {
+    localStorage.removeItem(KEY_STORE);
+    showSetup();
+  }
+}
+
+function showSetup() {
+  document.getElementById('setupScreen').classList.add('visible');
+  document.getElementById('mainScreen').classList.remove('visible');
+  document.getElementById('keyInput').value = '';
+  document.getElementById('setupError').style.display = 'none';
+  document.getElementById('setupSuccess').style.display = 'none';
+}
+
+function showMain() {
+  document.getElementById('setupScreen').classList.remove('visible');
+  document.getElementById('mainScreen').classList.add('visible');
+  const k = getKey();
+  document.getElementById('keyPreview').textContent = k.length > 10 ? k.slice(0,10) + '...' + k.slice(-4) : '••••';
+}
+
+// ── INIT ──
+getKey() ? showMain() : showSetup();
+
+// ── FETCH ──
+async function fetchBoxscore(url) {
+  const proxy = `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`;
+  const r = await fetch(proxy);
+  if (!r.ok) throw new Error(`Could not fetch page (${r.status})`);
+  const d = await r.json();
+  if (!d.contents) throw new Error('Empty response from page');
+  return d.contents;
+}
+
+// ── PARSE ──
+function parseBoxscore(html) {
+  const doc = new DOMParser().parseFromString(html, 'text/html');
+  const tn = doc.querySelectorAll('.game-header .team-name');
+  const g = {
+    awayTeam: tn[0]?.textContent?.trim() || 'Away',
+    homeTeam: tn[1]?.textContent?.trim() || 'Home',
+    awayScore: doc.querySelector('.game-header-center .away')?.textContent?.trim() || '0',
+    homeScore: doc.querySelector('.game-header-center .home')?.textContent?.trim() || '0',
+    date: doc.querySelector('.game_info_bar_v2 .date')?.textContent?.trim() || '',
+    location: doc.querySelector('.game_info_bar_v2 .location')?.textContent?.trim() || '',
+    status: doc.querySelector('.game_info_bar_v2 .status')?.textContent?.trim() || 'Final',
+    periods: [], scoring: [], skaters: {away:[], home:[]}, goalies: {away:[], home:[]}
+  };
+
+  doc.querySelectorAll('.line_score_v2 tbody tr').forEach(row => {
+    const cells = Array.from(row.querySelectorAll('td')).map(c => c.textContent.trim());
+    if (cells.length > 1) g.periods.push(cells);
+  });
+
+  doc.querySelectorAll('.scoring_summary li.scoring_info').forEach(item => {
+    const clock = item.querySelector('.game_clock')?.textContent?.trim();
+    const team = item.querySelector('.team_name')?.textContent?.trim();
+    const details = item.querySelector('.play_details')?.textContent?.trim().replace(/\s+/g,' ');
+    const sc = item.querySelectorAll('.team_score');
+    if (clock && team) g.scoring.push({clock, team, details, sa: sc[0]?.textContent?.trim(), sh: sc[1]?.textContent?.trim()});
+  });
+
+  let si = 0, gi = 0;
+  doc.querySelectorAll('.player_stats-list.stat_table').forEach(table => {
+    const hdrs = Array.from(table.querySelectorAll('thead tr:first-child th')).map(h => h.textContent.trim());
+    const isG = hdrs.includes('SV %') || hdrs.includes('SV');
+    const isS = hdrs.includes('G') && hdrs.includes('A') && !isG;
+    if (isS) {
+      const side = si===0 ? 'away' : 'home';
+      table.querySelectorAll('tbody tr').forEach(row => {
+        const c = row.querySelectorAll('td');
+        if (c.length < 6) return;
+        const name = c[1]?.textContent?.trim();
+        if (!name || name==='Totals') return;
+        g.skaters[side].push({num:c[0]?.textContent?.trim(), name, g:+c[2]?.textContent||0, a:+c[3]?.textContent||0, pts:+c[4]?.textContent||0, sog:+c[5]?.textContent||0, pim:+c[6]?.textContent||0});
+      });
+      si++;
+    }
+    if (isG) {
+      const side = gi===0 ? 'away' : 'home';
+      table.querySelectorAll('tbody tr').forEach(row => {
+        const c = row.querySelectorAll('td');
+        if (c.length < 6) return;
+        const name = c[1]?.textContent?.trim();
+        if (!name || name==='Totals') return;
+        g.goalies[side].push({num:c[0]?.textContent?.trim(), name, min:c[2]?.textContent?.trim(), sa:+c[3]?.textContent||0, ga:+c[4]?.textContent||0, sv:+c[5]?.textContent||0, svPct:c[6]?.textContent?.trim()});
+      });
+      gi++;
+    }
+  });
+  return g;
+}
+
+// ── FORMAT ──
+function formatGameData(g) {
+  const L = [];
+  L.push(`GAME: ${g.awayTeam} at ${g.homeTeam}`);
+  L.push(`DATE: ${g.date}  |  VENUE: ${g.location}`);
+  L.push(`FINAL: ${g.awayTeam} ${g.awayScore} - ${g.homeScore} ${g.homeTeam} (${g.status})`);
+  L.push('');
+  if (g.periods.length) { L.push('PERIOD SCORES:'); g.periods.forEach(r => L.push('  ' + r.join('  '))); L.push(''); }
+  if (g.scoring.length) { L.push('SCORING:'); g.scoring.forEach(s => L.push(`  ${s.clock} ${s.team}: ${s.details} (${s.sa}-${s.sh})`)); L.push(''); }
+  const addS = (list, team) => {
+    const n = list.filter(s => s.pts>0||s.pim>0).sort((a,b)=>b.pts-a.pts);
+    if (!n.length) return;
+    L.push(`${team} SKATERS:`);
+    n.forEach(s => { const p=[`#${s.num} ${s.name}`]; if(s.g)p.push(`${s.g}G`); if(s.a)p.push(`${s.a}A`); if(s.pts)p.push(`${s.pts}PTS`); if(s.sog)p.push(`${s.sog}SOG`); if(s.pim)p.push(`${s.pim}PIM`); L.push('  '+p.join(' ')); });
+    L.push('');
+  };
+  addS(g.skaters.away, g.awayTeam); addS(g.skaters.home, g.homeTeam);
+  const addG = (list, team) => { if(!list.length)return; L.push(`${team} GOALIES:`); list.forEach(gl=>L.push(`  #${gl.num} ${gl.name} ${gl.min}MIN ${gl.sa}SA ${gl.sv}SV ${gl.ga}GA ${gl.svPct}`)); L.push(''); };
+  addG(g.goalies.away, g.awayTeam); addG(g.goalies.home, g.homeTeam);
+  return L.join('\n');
+}
+
+// ── CLAUDE ──
+async function callClaude(text) {
+  const r = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: { 'Content-Type':'application/json', 'x-api-key':getKey(), 'anthropic-version':'2023-06-01', 'anthropic-dangerous-direct-browser-access':'true' },
+    body: JSON.stringify({ model:'claude-sonnet-4-20250514', max_tokens:1000, system:STYLE_PROMPT, messages:[{role:'user', content:`Here is the boxscore data. Please write a game recap following your style guidelines.\n\n${text}`}] })
+  });
+  if (!r.ok) { const e = await r.json().catch(()=>({})); throw new Error(e?.error?.message || `API error ${r.status}`); }
+  return (await r.json()).content[0].text;
+}
+
+// ── FLOW ──
+let lastData = null;
+
+async function generateRecap() {
+  let url = document.getElementById('urlInput').value.trim();
+  if (!url) { showError('Please paste a boxscore URL.'); return; }
+  if (!url.includes('subseason')) url += (url.includes('?')?'&':'?') + `subseason=${SUBSEASON}`;
+  hideError(); hideResult(); setLoading(true, 'Fetching boxscore...');
+  try {
+    const html = await fetchBoxscore(url);
+    setLoading(true, 'Parsing game data...');
+    const gd = parseBoxscore(html);
+    const text = formatGameData(gd);
+    lastData = text;
+    setLoading(true, 'Generating recap with AI...');
+    const recap = await callClaude(text);
+    setLoading(false);
+    document.getElementById('gameTitle').textContent = `${gd.awayTeam} ${gd.awayScore} - ${gd.homeScore} ${gd.homeTeam}  |  ${gd.date}`;
+    document.getElementById('recapOutput').value = recap;
+    document.getElementById('gameDataPreview').textContent = text;
+    document.getElementById('resultSection').classList.add('visible');
+    updateWordCount();
+  } catch(e) { setLoading(false); showError(e.message || 'Something went wrong.'); }
+}
+
+async function regenerate() {
+  if (!lastData) return;
+  hideResult(); setLoading(true, 'Regenerating...');
+  try { const r = await callClaude(lastData); setLoading(false); document.getElementById('recapOutput').value = r; document.getElementById('resultSection').classList.add('visible'); updateWordCount(); }
+  catch(e) { setLoading(false); showError(e.message); }
+}
+
+function hideResult() { document.getElementById('resultSection').classList.remove('visible'); }
+function setLoading(on, msg) { document.getElementById('generateBtn').disabled=on; const el=document.getElementById('statusLoading'); el.style.display=on?'flex':'none'; if(msg)document.getElementById('statusText').textContent=msg; }
+function showError(msg) { const el=document.getElementById('statusError'); el.textContent='⚠️ '+msg; el.style.display='block'; }
+function hideError() { document.getElementById('statusError').style.display='none'; }
+function setMsg(id, msg) { const el=document.getElementById(id); el.textContent=msg; el.style.display='block'; }
+function copyRecap() { navigator.clipboard.writeText(document.getElementById('recapOutput').value).then(()=>{ const c=document.getElementById('copyConfirm'); c.classList.add('show'); setTimeout(()=>c.classList.remove('show'),2500); }); }
+function updateWordCount() { const t=document.getElementById('recapOutput').value.trim(); document.getElementById('wordCount').textContent=(t?t.split(/\s+/).length:0)+' words'; }
+
+document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('urlInput')?.addEventListener('keydown', e => { if(e.key==='Enter') generateRecap(); });
+  document.getElementById('keyInput')?.addEventListener('keydown', e => { if(e.key==='Enter') saveKey(); });
+});
+</script>
+</body>
+</html>
