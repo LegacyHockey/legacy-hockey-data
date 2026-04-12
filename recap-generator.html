@@ -915,14 +915,16 @@ function formatGameData(g, enrichment) {
   };
   addG(g.goalies.away, g.awayTeam); addG(g.goalies.home, g.homeTeam);
 
-  // Add explicit shots summary so AI gets the comparison right
-  const awaySA = g.goalies.home.reduce((sum, gl) => sum + gl.sa, 0);
-  const homeSA = g.goalies.away.reduce((sum, gl) => sum + gl.sa, 0);
-  if (awaySA > 0 || homeSA > 0) {
-    const moreTeam = awaySA >= homeSA ? g.awayTeam : g.homeTeam;
-    const lessTeam = awaySA >= homeSA ? g.homeTeam : g.awayTeam;
-    const moreShots = Math.max(awaySA, homeSA);
-    const lessShots = Math.min(awaySA, homeSA);
+  // Add explicit shots summary
+  // Away goalie SA = shots taken BY home team against away goalie
+  // Home goalie SA = shots taken BY away team against home goalie  
+  const awayTeamShots = g.goalies.home.reduce((sum, gl) => sum + gl.sa, 0);
+  const homeTeamShots = g.goalies.away.reduce((sum, gl) => sum + gl.sa, 0);
+  if (awayTeamShots > 0 || homeTeamShots > 0) {
+    const moreShots = Math.max(awayTeamShots, homeTeamShots);
+    const lessShots = Math.min(awayTeamShots, homeTeamShots);
+    const moreTeam = awayTeamShots >= homeTeamShots ? g.awayTeam : g.homeTeam;
+    const lessTeam = awayTeamShots >= homeTeamShots ? g.homeTeam : g.awayTeam;
     L.push(`SHOTS ON GOAL: ${moreTeam} outshot ${lessTeam} ${moreShots}-${lessShots}`);
     L.push('');
   }
