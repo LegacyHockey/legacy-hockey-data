@@ -496,27 +496,51 @@ function parseBoxscore(html) {
   });
   console.log('Team node IDs:', g.awayTeam, g.awayNodeId, '/', g.homeTeam, g.homeNodeId);
 
-  doc.querySelectorAll('.line_score_v2 tbody tr').forEach(row => {
-    const cells = Array.from(row.querySelectorAll('td')).map(c => c.textContent.trim());
-    if (cells.length > 1) g.periods.push(cells);
-  });
+  // Parse line score - only take rows with numeric scores, deduplicate
+  const lineScoreTable = doc.querySelector('.line_score_v2');
+  if (lineScoreTable) {
+    const seen = new Set();
+    lineScoreTable.querySelectorAll('tbody tr').forEach(row => {
+      const cells = Array.from(row.querySelectorAll('td')).map(c => c.textContent.trim());
+      if (cells.length < 3) return;
+      // Only include rows where most cells are numeric (actual score rows)
+      const numericCells = cells.slice(1).filter(c => /^\d+$/.test(c)).length;
+      if (numericCells < 2) return;
+      const key = cells.join('|');
+      if (!seen.has(key)) { seen.add(key); g.periods.push(cells); }
+    });
 
-  // Count OT periods from header row
-  const periodHeaders = Array.from(doc.querySelectorAll('.line_score_v2 thead th')).map(h => h.textContent.trim());
-  const otPeriods = periodHeaders.filter(h => h.startsWith('OT')).length;
-  g.otPeriods = otPeriods;
-  if (otPeriods === 0) g.otLabel = '';
-  else if (otPeriods === 1) g.otLabel = 'overtime';
-  else if (otPeriods === 2) g.otLabel = 'double overtime';
-  else if (otPeriods === 3) g.otLabel = 'triple overtime';
-  else g.otLabel = otPeriods + '-overtime';
+    // Count OT periods from header - use first thead only to avoid duplicates
+    const firstThead = lineScoreTable.querySelector('thead');
+    const periodHeaders = firstThead
+      ? Array.from(firstThead.querySelectorAll('th')).map(h => h.textContent.trim())
+      : [];
+    const otPeriods = periodHeaders.filter(h => h.match(/^OT/i)).length;
+    g.otPeriods = otPeriods;
+    if (otPeriods === 0) g.otLabel = '';
+    else if (otPeriods === 1) g.otLabel = 'overtime';
+    else if (otPeriods === 2) g.otLabel = 'double overtime';
+    else if (otPeriods === 3) g.otLabel = 'triple overtime';
+    else g.otLabel = otPeriods + '-overtime';
+  }
 
+  // Parse scoring summary - separate goals from penalties
   doc.querySelectorAll('.scoring_summary li.scoring_info').forEach(item => {
     const clock = item.querySelector('.game_clock')?.textContent?.trim();
     const team = item.querySelector('.team_name')?.textContent?.trim();
-    const details = item.querySelector('.play_details')?.textContent?.trim().replace(/\s+/g,' ');
+    const details = item.querySelector('.play_details')?.textContent?.trim().replace(/\s+/g,' ') || '';
     const sc = item.querySelectorAll('.team_score');
-    if (clock && team) g.scoring.push({clock, team, details, sa: sc[0]?.textContent?.trim(), sh: sc[1]?.textContent?.trim()});
+    if (!clock || !team) return;
+    // Penalties contain "Minor", "Major", "Misconduct", "Game" — exclude from scoring
+    const isPenalty = /minor|major|misconduct|match|penalty shot/i.test(details);
+    if (!isPenalty) {
+      const scoreAway = sc[0]?.textContent?.trim();
+      const scoreHome = sc[1]?.textContent?.trim();
+      // Only include if we have valid score numbers
+      if (scoreAway && scoreHome && /^\d+$/.test(scoreAway) && /^\d+$/.test(scoreHome)) {
+        g.scoring.push({clock, team, details, sa: scoreAway, sh: scoreHome});
+      }
+    }
   });
 
   let si = 0, gi = 0;
@@ -788,7 +812,7 @@ function formatGameData(g, enrichment) {
     const homeRank = enrichment.rankings[g.homeTeam];
     if (awayRank || homeRank) {
       L.push('');
-      L.push('STATE RANKINGS (reference naturally in story):');
+      L.push('STATE RANKINGS (these are poll rankings, not seeds — reference naturally if relevant):');
       if (awayRank) L.push(`  ${g.awayTeam}: No. ${awayRank} in state rankings`);
       if (homeRank) L.push(`  ${g.homeTeam}: No. ${homeRank} in state rankings`);
       if (!awayRank) L.push(`  ${g.awayTeam}: unranked`);
@@ -804,7 +828,14 @@ function formatGameData(g, enrichment) {
   }
   L.push('');
   if (g.periods.length) { L.push('PERIOD SCORES:'); g.periods.forEach(r => L.push('  ' + r.join('  '))); L.push(''); }
-  if (g.scoring.length) { L.push('SCORING:'); g.scoring.forEach(s => L.push(`  ${s.clock} ${s.team}: ${s.details} (${s.sa}-${s.sh})`)); L.push(''); }
+  if (g.scoring.length) {
+    L.push('SCORING (goals only):');
+    g.scoring.forEach(s => {
+      const score = (s.sa && s.sh) ? ` (${s.sa}-${s.sh})` : '';
+      L.push(`  ${s.clock} ${s.team}: ${s.details}${score}`);
+    });
+    L.push('');
+  }
   const addS = (list, team) => {
     const n = list.filter(s => s.pts>0||s.pim>0).sort((a,b)=>b.pts-a.pts);
     if (!n.length) return;
