@@ -473,8 +473,28 @@ function parseBoxscore(html) {
     date: doc.querySelector('.game_info_bar_v2 .date')?.textContent?.trim() || '',
     location: doc.querySelector('.game_info_bar_v2 .location')?.textContent?.trim() || '',
     status: doc.querySelector('.game_info_bar_v2 .status')?.textContent?.trim() || 'Final',
-    periods: [], scoring: [], skaters: {away:[], home:[]}, goalies: {away:[], home:[]}
+    periods: [], scoring: [], skaters: {away:[], home:[]}, goalies: {away:[], home:[]},
+    awayNodeId: null, homeNodeId: null
   };
+
+  // Extract team page node IDs from links in the boxscore
+  const teamPageLinks = doc.querySelectorAll('a[href*="page/show"]');
+  const awayLower = g.awayTeam.toLowerCase();
+  const homeLower = g.homeTeam.toLowerCase();
+  teamPageLinks.forEach(a => {
+    const text = a.textContent.trim().toLowerCase();
+    const href = a.getAttribute('href') || '';
+    const match = href.match(/page\/show\/(\d+)-/);
+    if (!match) return;
+    const nodeId = match[1];
+    if (!g.awayNodeId && (text === awayLower || text.includes(awayLower) || awayLower.includes(text)) && text.length > 2) {
+      g.awayNodeId = nodeId;
+    }
+    if (!g.homeNodeId && (text === homeLower || text.includes(homeLower) || homeLower.includes(text)) && text.length > 2) {
+      g.homeNodeId = nodeId;
+    }
+  });
+  console.log('Team node IDs:', g.awayTeam, g.awayNodeId, '/', g.homeTeam, g.homeNodeId);
 
   doc.querySelectorAll('.line_score_v2 tbody tr').forEach(row => {
     const cells = Array.from(row.querySelectorAll('td')).map(c => c.textContent.trim());
@@ -536,38 +556,101 @@ async function fetchViaProxy(url) {
   try { return await proxyFetch(url, 200); } catch(e) { return null; }
 }
 
-// Parse team records from conference standings Ajax endpoint
-async function fetchTeamRecords(teamNames) {
-  const records = {};
-  try {
-    const url = `https://www.legacy.hockey/page_element/ajax/661234226?width_percentage=100&page_node_id=9113380&subseason=${SUBSEASON}`;
-    const html = await fetchViaProxy(url);
-    if (!html) return records;
+// Team name → standings page node ID lookup
+// Format: 'Team Name': nodeId
+const TEAM_NODE_IDS = {
+  // Big 9
+  'Austin': 9113383, 'Faribault': 9113384, 'Mankato East': 9113385, 'Mankato West': 9113386,
+  'Northfield': 9113387, 'Owatonna': 9113388, 'Rochester Century': 9113389, 'Rochester John Marshall': 9113390,
+  'Rochester Mayo': 9113391, 'Winona': 9113392,
+  // Big South
+  'Albert Lea': 9113406, 'Dodge County': 9113407, 'Fairmont': 9113408, 'Farmington': 9113409,
+  'Hastings': 9113529, 'Lakeville North': 9113411, 'Lakeville South': 9113412,
+  'New Prague': 9113413, 'Northfield': 9113414, 'Red Wing': 9113415,
+  // Central Lakes
+  'Alexandria': 9113425, 'Brainerd': 9113426, 'Detroit Lakes': 9113427, 'Fergus Falls': 9113428,
+  'Sartell-St. Stephen': 9113429, 'St. Cloud Apollo': 9113430, 'St. Cloud Cathedral': 9113431,
+  'St. Cloud Tech': 9113432, 'Willmar': 9113433,
+  // IMAC
+  'Academy of Holy Angels': 9113451, 'Benilde-St. Margaret's': 9113452, 'Blake': 9113453,
+  'Breck': 9113454,
+  // Iron Range
+  'Eveleth-Gilbert': 9113475, 'Greenway': 9113476, 'Hibbing/Chisholm': 9113477,
+  'International Falls': 9113478, 'Virginia': 9113479,
+  // Lake
+  'Chaska': 9113484, 'Chanhassen': 9113485, 'Eden Prairie': 9113486, 'Edina': 9113488,
+  'Hopkins': 9113489, 'Minnetonka': 9113490, 'Prior Lake': 9113491, 'Shakopee': 9113492,
+  // Lake Superior
+  'Cloquet-Esko-Carlton': 9113497, 'Duluth Denfeld': 9113498, 'Duluth East': 9113499,
+  'Duluth Marshall': 9113500, 'Proctor/Hermantown': 9113501, 'Superior': 9113502,
+  'Two Harbors': 9113503, 'Hermantown': 9113504,
+  // Mariucci
+  'Andover': 9113514, 'Anoka': 9113515, 'Blaine': 9113516, 'Cambridge-Isanti': 9113517,
+  'Coon Rapids': 9113518, 'Elk River': 9113519, 'Rogers': 9113520,
+  // Metro East
+  'Two Rivers': 9113531, 'Hill-Murray': 9113533, 'Mahtomedi': 9113535,
+  'St. Thomas Academy': 9113537, 'Simley': 9113539, 'South St. Paul': 9113541, 'Tartan': 9113543,
+  // Metro West
+  'Benilde-St. Margaret's': 9113546, 'Bloomington Jefferson': 9113547, 'Burnsville': 9113548,
+  'Holy Angels': 9113549, 'Minnetonka': 9113550, 'Rosemount': 9113551,
+  'St. Louis Park': 9113552, 'Wayzata': 9113553,
+  // Mississippi 8
+  'Centennial': 9113563, 'Forest Lake': 9113564, 'Mounds View': 9113565,
+  'North St. Paul/Tartan': 9113566, 'Spring Lake Park': 9113567,
+  'Stillwater': 9113568, 'White Bear Lake': 9113569,
+  // Northwest Suburban
+  'Armstrong/Cooper': 9113587, 'Buffalo': 9113588, 'Champlin Park': 9113589,
+  'Maple Grove': 9113590, 'Osseo': 9113591, 'Park Center': 9113592,
+  'Plymouth': 9113593, 'Robbinsdale Cooper': 9113594,
+  // South Suburban
+  'Apple Valley': 9113612, 'Burnsville': 9113613, 'Eastview': 9113614,
+  'Eagan': 9113615, 'Farmington': 9113616, 'Lakeville North': 9113617,
+  'Lakeville South': 9113618, 'Rosemount': 9113619, 'Savage/Prior Lake': 9113620,
+  // Suburban East
+  'East Ridge': 9113631, 'Maplewood/Hill-Murray': 9113632, 'Minnetonka': 9113633,
+  'North St. Paul': 9113634, 'Stillwater': 9113635, 'White Bear Lake': 9113636,
+  'Woodbury': 9113637, 'Park': 9113638,
+  // Tri-Metro
+  'Cretin-Derham Hall': 9113657, 'Gentry Academy': 9113658, 'St. Paul Johnson': 9113659,
+  'South St. Paul': 9113660, 'St. Paul Como Park': 9113661,
+  // West Central
+  'Montevideo': 9113668, 'Morris/Benson Area': 9113669, 'New London-Spicer': 9113670,
+  'Ortonville': 9113671, 'Willmar': 9113672,
+  // Wright County
+  'Delano': 9113679, 'Litchfield/Dassel-Cokato': 9113680, 'Monticello': 9113681,
+  'Moorhead': 9113522, 'Warroad': 9113480,
+  // Northwest
+  'Bemidji': 9113578, 'Crookston': 9113579, 'East Grand Forks': 9113580, 'Thief River Falls': 9113581,
+};
 
-    const doc = new DOMParser().parseFromString(html, 'text/html');
-    doc.querySelectorAll('table tbody tr').forEach(row => {
-      const cells = row.querySelectorAll('td');
-      if (cells.length < 4) return;
-      const name = cells[0]?.textContent?.trim();
-      // Look for Overall column — typically has W-L-T format
-      // Find the cell that contains a record pattern like "14-8-2"
-      for (let i = 1; i < cells.length; i++) {
-        const text = cells[i]?.textContent?.trim();
-        if (/^\d+-\d+-\d+$/.test(text)) {
-          // Match against team names (fuzzy — check if team name contains or is contained in cell name)
-          for (const teamName of teamNames) {
-            if (name && (name.toLowerCase().includes(teamName.toLowerCase()) ||
-                teamName.toLowerCase().includes(name.toLowerCase()))) {
-              records[teamName] = text;
-              break;
-            }
-          }
-          break;
+// Fetch team records using node IDs extracted from the boxscore page
+async function fetchTeamRecords(gameData) {
+  const records = {};
+  const teams = [
+    { name: gameData.awayTeam, nodeId: gameData.awayNodeId },
+    { name: gameData.homeTeam, nodeId: gameData.homeNodeId }
+  ];
+  await Promise.all(teams.map(async team => {
+    if (!team.nodeId) { console.warn('No node ID for:', team.name); return; }
+    try {
+      const url = `https://www.legacy.hockey/standings/show/${team.nodeId}?subseason=${SUBSEASON}`;
+      const html = await fetchViaProxy(url);
+      if (!html) return;
+      const doc = new DOMParser().parseFromString(html, 'text/html');
+      doc.querySelectorAll('table tbody tr').forEach(row => {
+        const cells = row.querySelectorAll('td');
+        if (cells.length < 10) return;
+        const rowName = cells[0]?.textContent?.trim().toLowerCase();
+        const record = cells[9]?.textContent?.trim();
+        const teamLower = team.name.toLowerCase();
+        if (record && rowName &&
+            (rowName.includes(teamLower) || teamLower.includes(rowName))) {
+          records[team.name] = record;
         }
-      }
-    });
-    console.log('Records fetched:', records);
-  } catch(e) { console.warn('fetchTeamRecords failed:', e.message); }
+      });
+    } catch(e) { console.warn('fetchTeamRecords failed for', team.name, e.message); }
+  }));
+  console.log('Records fetched:', records);
   return records;
 }
 
@@ -587,25 +670,18 @@ async function fetchStateRankings(teamNames) {
 
       const doc = new DOMParser().parseFromString(html, 'text/html');
       // Rankings use .rankingsElement .statTable or similar
-      doc.querySelectorAll('.statTable tbody tr, table tbody tr').forEach(row => {
+      // Structure confirmed: cell[0]=rank (e.g. "1."), cell[2]=team name, cell[3]=record
+      doc.querySelectorAll('table tbody tr').forEach(row => {
         const cells = row.querySelectorAll('td');
-        if (cells.length < 2) return;
-        // First cell is rank number, find team name cell
-        const rankText = cells[0]?.textContent?.trim();
+        if (cells.length < 4) return;
+        const rankText = cells[0]?.textContent?.trim().replace('.','');
         const rank = parseInt(rankText);
         if (!rank || rank > 20) return;
-
-        // Team name is usually in a cell with a link or text
-        for (let i = 1; i < cells.length; i++) {
-          const cellText = cells[i]?.textContent?.trim();
-          if (cellText && cellText.length > 2 && !/^\d+$/.test(cellText)) {
-            for (const teamName of teamNames) {
-              if (cellText.toLowerCase().includes(teamName.toLowerCase()) ||
-                  teamName.toLowerCase().includes(cellText.toLowerCase())) {
-                rankings[teamName] = rank;
-                break;
-              }
-            }
+        const teamCell = cells[2]?.textContent?.trim();
+        for (const teamName of teamNames) {
+          if (teamCell && (teamCell.toLowerCase().includes(teamName.toLowerCase()) ||
+              teamName.toLowerCase().includes(teamCell.toLowerCase()))) {
+            rankings[teamName] = rank;
             break;
           }
         }
@@ -770,7 +846,7 @@ async function generateRecap() {
     setLoading(true, 'Fetching records, rankings & leaderboard data...');
     const teamNames = [gd.awayTeam, gd.homeTeam];
     const [records, rankings, leaderboardNotes] = await Promise.all([
-      fetchTeamRecords(teamNames),
+      fetchTeamRecords(gd),
       fetchStateRankings(teamNames),
       fetchLeaderboardContext(gd)
     ]);
