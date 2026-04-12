@@ -437,12 +437,17 @@ getKey() ? showMain() : showSetup();
 
 // ── FETCH ──
 async function fetchBoxscore(url) {
+  return proxyFetch(url, 500);
+}
+
+async function proxyFetch(url, minLength) {
+  minLength = minLength || 200;
   const encoded = encodeURIComponent(url);
   const proxies = [
+    ['corsproxy.io', `https://corsproxy.io/?url=${encoded}`, false],
+    ['thingproxy', `https://thingproxy.freeboard.io/fetch/${url}`, false],
     ['allorigins-raw', `https://api.allorigins.win/raw?url=${encoded}`, false],
     ['allorigins-get', `https://api.allorigins.win/get?url=${encoded}`, true],
-    ['corsproxy', `https://corsproxy.io/?url=${encoded}`, false],
-    ['thingproxy', `https://thingproxy.freeboard.io/fetch/${url}`, false],
   ];
   for (const [name, proxyUrl, isJson] of proxies) {
     try {
@@ -450,10 +455,10 @@ async function fetchBoxscore(url) {
       const r = await fetch(proxyUrl);
       if (!r.ok) { console.warn(name, 'HTTP', r.status); continue; }
       const text = isJson ? (await r.json()).contents : await r.text();
-      if (text && text.length > 500) return text;
+      if (text && text.length > minLength) { console.log('Success with:', name); return text; }
     } catch(e) { console.warn(name, 'failed:', e.message); }
   }
-  throw new Error('Could not load the boxscore page. All proxies failed — please try again shortly.');
+  throw new Error('Could not load page. All proxies failed — please try again shortly.');
 }
 
 // ── PARSE ──
@@ -528,21 +533,7 @@ function parseBoxscore(html) {
 // ── ENRICHMENT DATA FETCHING ──
 
 async function fetchViaProxy(url) {
-  const encoded = encodeURIComponent(url);
-  const proxies = [
-    ['allorigins-raw', `https://api.allorigins.win/raw?url=${encoded}`, false],
-    ['allorigins-get', `https://api.allorigins.win/get?url=${encoded}`, true],
-    ['corsproxy', `https://corsproxy.io/?url=${encoded}`, false],
-  ];
-  for (const [name, proxyUrl, isJson] of proxies) {
-    try {
-      const r = await fetch(proxyUrl);
-      if (!r.ok) continue;
-      const text = isJson ? (await r.json()).contents : await r.text();
-      if (text && text.length > 200) return text;
-    } catch(e) { console.warn('Enrichment proxy', name, 'failed:', e.message); }
-  }
-  return null;
+  try { return await proxyFetch(url, 200); } catch(e) { return null; }
 }
 
 // Parse team records from conference standings Ajax endpoint
