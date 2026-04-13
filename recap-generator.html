@@ -367,8 +367,13 @@ TONE & VOICE:
 
 STRUCTURE:
 1. Opening: Lead with the final result, the winning team, and what defined the game. Mention the score.
-2. Middle: Walk through key moments — goals, turning points, standout performances. Mention multi-point players by name.
+2. Middle: Walk through key moments — goals, turning points, standout performances. Mention multi-point players by name. Use the PERIOD SCORES and SCORING sections together to determine the score at the end of each period — do not guess or infer period-ending scores.
 3. Closing: Shots on goal totals, goalie save totals, notable penalty situations. End on a factual note — do not add editorial commentary, opinions, or invented context as a closing flourish.
+
+PERIOD SCORE ACCURACY:
+- Before stating what the score was "entering" any period, calculate it carefully from the period-by-period scoring data.
+- Example: if the scores by period are 2-1, 0-1, 4-1 then entering the third period the score was 2-2, not something else.
+- Never state a score entering a period without verifying it against the cumulative period totals.
 
 RULES:
 - Full name on first reference, last name only after that.
@@ -391,7 +396,7 @@ TEAM RECORDS (if provided):
 - Always use W-L-T format including ties even if 0. Example: "(14-8-2)" or "(22-5-0)"
 
 STATE RANKINGS (if provided):
-- Reference rankings naturally in the story. Example: "No. 3-ranked Moorhead" or "No. 12 Minnetonka"
+- Reference rankings naturally in the story. Always include the class in parenthesis immediately after the number. Examples: "No. 3 (2A)-ranked Moorhead" or "No. 5 (1A) Warroad"
 - Include teams from both the Top 10 and Next 10 if they appear in the data.
 - If a team is unranked, do not reference rankings for that team.
 
@@ -728,13 +733,13 @@ async function fetchStateRankings(teamNames) {
       `https://www.legacy.hockey/layout_container/show_layout_tab?layout_container_id=89666221&page_node_id=2445160&tab_element_id=271925`
     ];
 
-    for (const url of urls) {
-      const html = await fetchViaProxy(url);
+  const classLabels = ['2A', '1A'];
+    for (let ci = 0; ci < urls.length; ci++) {
+      const html = await fetchViaProxy(urls[ci]);
       if (!html) continue;
+      const classLabel = classLabels[ci];
 
       const doc = new DOMParser().parseFromString(html, 'text/html');
-      // Rankings use .rankingsElement .statTable or similar
-      // Structure confirmed: cell[0]=rank (e.g. "1."), cell[2]=team name, cell[3]=record
       doc.querySelectorAll('table tbody tr').forEach(row => {
         const cells = row.querySelectorAll('td');
         if (cells.length < 4) return;
@@ -745,7 +750,7 @@ async function fetchStateRankings(teamNames) {
         for (const teamName of teamNames) {
           if (teamCell && (teamCell.toLowerCase().includes(teamName.toLowerCase()) ||
               teamName.toLowerCase().includes(teamCell.toLowerCase()))) {
-            rankings[teamName] = rank;
+            rankings[teamName] = { rank, classLabel };
             break;
           }
         }
@@ -873,11 +878,11 @@ function formatGameData(g, enrichment) {
   if (enrichment?.rankings) {
     const awayRank = enrichment.rankings[g.awayTeam];
     const homeRank = enrichment.rankings[g.homeTeam];
-    if (awayRank || homeRank) {
+    if (awayRank?.rank || homeRank?.rank) {
       L.push('');
-      L.push('STATE RANKINGS (these are poll rankings, not seeds — reference naturally if relevant):');
-      if (awayRank) L.push(`  ${g.awayTeam}: No. ${awayRank} in state rankings`);
-      if (homeRank) L.push(`  ${g.homeTeam}: No. ${homeRank} in state rankings`);
+      L.push('STATE RANKINGS (these are poll rankings, not seeds — reference naturally if relevant. Always include the class in parenthesis after the ranking number, e.g. "No. 3 (2A)" or "No. 5 (1A)"):');
+      if (awayRank) L.push(`  ${g.awayTeam}: No. ${awayRank.rank} (Class ${awayRank.classLabel})`);
+      if (homeRank) L.push(`  ${g.homeTeam}: No. ${homeRank.rank} (Class ${homeRank.classLabel})`);
       if (!awayRank) L.push(`  ${g.awayTeam}: unranked`);
       if (!homeRank) L.push(`  ${g.homeTeam}: unranked`);
     }
@@ -890,7 +895,25 @@ function formatGameData(g, enrichment) {
     enrichment.leaderboardNotes.forEach(note => L.push(`  - ${note}`));
   }
   L.push('');
-  if (g.periods.length) { L.push('PERIOD SCORES:'); g.periods.forEach(r => L.push('  ' + r.join('  '))); L.push(''); }
+  if (g.periods.length >= 2) {
+    L.push('PERIOD SCORES:');
+    g.periods.forEach(r => L.push('  ' + r.join('  ')));
+    // Add cumulative running scores to help AI get period-entry scores right
+    const awayRow = g.periods[0];
+    const homeRow = g.periods[1];
+    const numCols = awayRow.length - 2; // exclude team name and total columns
+    let awayRunning = 0, homeRunning = 0;
+    L.push('  SCORE ENTERING EACH PERIOD:');
+    for (let i = 1; i <= numCols; i++) {
+      const label = i === 1 ? 'Period 1' : i === 2 ? 'Period 2' : i === 3 ? 'Period 3' : 'OT' + (i-3);
+      L.push(`    Start of ${label}: ${awayRow[0]} ${awayRunning} - ${homeRunning} ${homeRow[0]}`);
+      awayRunning += parseInt(awayRow[i]) || 0;
+      homeRunning += parseInt(homeRow[i]) || 0;
+    }
+    L.push('');
+  } else if (g.periods.length) {
+    L.push('PERIOD SCORES:'); g.periods.forEach(r => L.push('  ' + r.join('  '))); L.push('');
+  }
   if (g.scoring.length) {
     L.push('SCORING (goals only):');
     g.scoring.forEach(s => {
