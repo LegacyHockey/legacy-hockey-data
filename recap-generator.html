@@ -850,6 +850,24 @@ function formatGameData(g, enrichment) {
   L.push(`FINAL: ${g.awayTeam} ${g.awayScore} - ${g.homeScore} ${g.homeTeam} (${g.status}${otNote})`);
   if (g.otLabel) L.push(`OVERTIME PERIODS PLAYED: ${g.otPeriods} (${g.otLabel})`);
 
+  // Pre-calculate period entry scores and place prominently
+  if (g.periods.length >= 2) {
+    const awayRow = g.periods[0];
+    const homeRow = g.periods[1];
+    const numCols = awayRow.length - 2;
+    let awayR = 0, homeR = 0;
+    L.push('');
+    L.push('*** CRITICAL — SCORE ENTERING EACH PERIOD (you MUST use these exact scores, do not calculate from goals) ***');
+    for (let i = 1; i <= numCols; i++) {
+      const label = i <= 3 ? `Period ${i}` : `OT${i-3}`;
+      L.push(`  Entering ${label}: ${awayRow[0]} ${awayR} - ${homeR} ${homeRow[0]}`);
+      awayR += parseInt(awayRow[i]) || 0;
+      homeR += parseInt(homeRow[i]) || 0;
+    }
+    L.push(`  FINAL: ${awayRow[0]} ${awayR} - ${homeR} ${homeRow[0]}`);
+    L.push('***');
+  }
+
   // Enrichment: nicknames
   if (enrichment?.nicknames) {
     const awayNick = enrichment.nicknames[g.awayTeam];
