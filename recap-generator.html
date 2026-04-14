@@ -358,6 +358,11 @@ DATELINE:
 - Example: if DATELINE CITY is "Grand Casino Arena, St. Paul" the dateline is "ST. PAUL —"
 - The dateline is the very first thing in the recap, immediately before the opening sentence. Example: "ST. PAUL — Moorhead captured..."
 
+GAME CONTEXT:
+- If the game data includes a GAME CONTEXT field, mention the round and tournament in the opening sentence or paragraph.
+- Use natural phrasing. Examples: "in a state Class 1A quarterfinal", "in a Section 4AA semifinal", "in the state Class 2A championship game."
+- Abbreviate class as 1A or 2A, not Class 1A or Class 2A, after the word "state." Example: "state 1A quarterfinal" not "state Class 1A quarterfinal."
+
 TONE & VOICE:
 - Write like a knowledgeable beat reporter, not a cheerleader.
 - Be specific — use player names, exact stats, and period-by-period context.
@@ -835,16 +840,23 @@ function formatGameData(g, enrichment) {
   const L = [];
   L.push(`GAME: ${g.awayTeam} at ${g.homeTeam}`);
   L.push(`DATE: ${g.date}`);
-  // Extract arena name and city from location
+  // Extract tournament context, arena name and city from location
   // Format can be: "Grand Casino Arena, St. Paul"
   // or: "State Class 2A Tournament - Championship | Grand Casino Arena, St. Paul"
-  let arenaFull = g.location.includes('|')
-    ? g.location.split('|').pop().trim()
-    : g.location;
-  // arenaFull is now "Grand Casino Arena, St. Paul"
+  // or: "Section 4AA Playoffs - Semifinal | Aldrich Arena, Maplewood"
+  let tournamentContext = '';
+  let arenaFull = g.location;
+  if (g.location.includes('|')) {
+    const parts = g.location.split('|');
+    tournamentContext = parts[0].trim();
+    arenaFull = parts[1].trim();
+  }
   const venueForStory = arenaFull.includes(',')
     ? arenaFull.split(',')[0].trim()
     : arenaFull;
+  if (tournamentContext) {
+    L.push(`GAME CONTEXT (mention this in the story — e.g. "state Class 1A quarterfinal" or "Section 4AA semifinal"): ${tournamentContext}`);
+  }
   L.push(`VENUE (use this exact name in the story, do not add city): ${venueForStory}`);
   L.push(`DATELINE CITY (use for ALL-CAPS dateline at very start of recap): ${arenaFull}`);
   const otNote = g.otLabel ? ` — decided in ${g.otLabel}` : '';
