@@ -361,7 +361,7 @@ DATELINE:
 GAME CONTEXT:
 - If the game data includes a GAME CONTEXT field, mention the round and tournament in the opening sentence or paragraph.
 - Use natural phrasing. Examples: "in a state Class 1A quarterfinal", "in a Section 4AA semifinal", "in the state Class 2A championship game."
-- Abbreviate class as 1A or 2A, not Class 1A or Class 2A, after the word "state." Example: "state 1A quarterfinal" not "state Class 1A quarterfinal."
+- Always include the word "Class" before 1A or 2A in tournament context. Example: "state Class 1A quarterfinal" not "state 1A quarterfinal."
 
 TONE & VOICE:
 - Write like a knowledgeable beat reporter, not a cheerleader.
@@ -369,6 +369,7 @@ TONE & VOICE:
 - Vary sentence structure. Avoid starting consecutive sentences the same way.
 - Do not use cliches like "finding the back of the net" or "between the pipes."
 - Use active voice. Keep it tight — no filler phrases.
+- Always use subject-verb sentence construction. Never begin a sentence with a participial phrase that delays the subject. Wrong: "Entering the third period trailing 3-0, Dodge County couldn't mount a comeback." Right: "Dodge County entered the third period trailing 3-0 and couldn't mount a comeback."
 
 STRUCTURE:
 1. Opening: Lead with the final result, the winning team, and what defined the game. Mention the score.
@@ -1025,7 +1026,15 @@ async function generateRecap() {
     setLoading(true, 'Generating recap with AI...');
     const recap = await callClaude(text);
     setLoading(false);
-    document.getElementById('gameTitle').textContent = `${gd.awayTeam} ${gd.awayScore} - ${gd.homeScore} ${gd.homeTeam}  |  ${gd.date}`;
+    // Format game title: winner first, higher score first, comma format, no leading zero in date
+  const awayScore = parseInt(gd.awayScore);
+  const homeScore = parseInt(gd.homeScore);
+  const winner = awayScore > homeScore ? gd.awayTeam : gd.homeTeam;
+  const loser = awayScore > homeScore ? gd.homeTeam : gd.awayTeam;
+  const winScore = Math.max(awayScore, homeScore);
+  const loseScore = Math.min(awayScore, homeScore);
+  const cleanDate = gd.date.replace(/\b0(\d)\b/g, '$1'); // remove leading zeros from day
+  document.getElementById('gameTitle').textContent = `${winner} ${winScore}, ${loser} ${loseScore}  |  ${cleanDate}`;
     document.getElementById('recapOutput').value = recap;
     document.getElementById('gameDataPreview').textContent = text;
     document.getElementById('resultSection').classList.add('visible');
