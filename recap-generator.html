@@ -509,7 +509,8 @@ function parseBoxscore(html) {
     if (!match) return;
     const nodeId = match[1];
     // Use full href but strip query string for clean page URL
-    const cleanUrl = 'https://www.legacy.hockey' + href.split('?')[0];
+    const hrefClean = href.split('?')[0];
+    const cleanUrl = hrefClean.startsWith('http') ? hrefClean : 'https://www.legacy.hockey' + hrefClean;
     if (!g.awayNodeId && (text === awayLower || text.includes(awayLower) || awayLower.includes(text)) && text.length > 2) {
       g.awayNodeId = nodeId;
       g.awayPageUrl = cleanUrl;
