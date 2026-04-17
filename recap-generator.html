@@ -711,17 +711,25 @@ async function fetchTeamNicknames(gameData) {
     { name: gameData.homeTeam, nodeId: gameData.homeNodeId, pageUrl: gameData.homePageUrl }
   ];
   await Promise.all(teams.map(async team => {
-    if (!team.nodeId && !team.pageUrl) return;
+    console.log('Fetching nickname for:', team.name, 'pageUrl:', team.pageUrl, 'nodeId:', team.nodeId);
+    if (!team.nodeId && !team.pageUrl) { console.warn('No URL or nodeId for', team.name); return; }
     try {
       const url = team.pageUrl ? `${team.pageUrl}?subseason=${SUBSEASON}` : `https://www.legacy.hockey/page/show/${team.nodeId}?subseason=${SUBSEASON}`;
+      console.log('Nickname fetch URL:', url);
       const html = await fetchViaProxy(url);
-      if (!html) return;
+      if (!html) { console.warn('No HTML returned for', team.name); return; }
+      console.log('HTML length for', team.name, ':', html.length);
       const doc = new DOMParser().parseFromString(html, 'text/html');
-      // Find the Team Information table and look for Nickname row
-      doc.querySelectorAll('table.dataTable tbody tr').forEach(row => {
+      const allRows = doc.querySelectorAll('table.dataTable tbody tr');
+      console.log('dataTable rows found for', team.name, ':', allRows.length);
+      // Also try without .dataTable class
+      const allTableRows = doc.querySelectorAll('table tbody tr');
+      console.log('All table rows for', team.name, ':', allTableRows.length);
+      allTableRows.forEach(row => {
         const cells = row.querySelectorAll('td');
         if (cells.length >= 2 && cells[0]?.textContent?.trim() === 'Nickname:') {
           nicknames[team.name] = cells[1]?.textContent?.trim();
+          console.log('Found nickname for', team.name, ':', nicknames[team.name]);
         }
       });
     } catch(e) { console.warn('fetchTeamNicknames failed for', team.name, e.message); }
