@@ -518,11 +518,12 @@ function parseBoxscore(html) {
     const matchesHome = (text === homeLower || text.includes(homeLower) || homeLower.includes(text) || slug === homeLower || slug.includes(homeLower) || homeLower.includes(slug)) && (text.length > 2 || slug.length > 2);
     if (!g.awayNodeId && matchesAway) {
       g.awayNodeId = nodeId;
-      g.awayPageUrl = cleanUrl;
+      // Use node ID only in URL — slug can be truncated for multi-word team names
+      g.awayPageUrl = `https://www.legacy.hockey/page/show/${nodeId}`;
     }
     if (!g.homeNodeId && matchesHome) {
       g.homeNodeId = nodeId;
-      g.homePageUrl = cleanUrl;
+      g.homePageUrl = `https://www.legacy.hockey/page/show/${nodeId}`;
     }
   });
   console.log('Team pages:', g.awayTeam, g.awayPageUrl, '/', g.homeTeam, g.homePageUrl);
@@ -724,12 +725,20 @@ async function fetchTeamNicknames(gameData) {
       const html = await fetchViaProxy(url);
       if (!html) { console.warn('No HTML returned for', team.name); continue; }
       console.log('HTML length for', team.name, ':', html.length);
-      const doc = new DOMParser().parseFromString(html, 'text/html');
-      const allRows = doc.querySelectorAll('table.dataTable tbody tr');
-      console.log('dataTable rows found for', team.name, ':', allRows.length);
-      // Also try without .dataTable class
-      const allTableRows = doc.querySelectorAll('table tbody tr');
+      let searchDoc = new DOMParser().parseFromString(html, 'text/html');
+      let allTableRows = searchDoc.querySelectorAll('table tbody tr');
       console.log('All table rows for', team.name, ':', allTableRows.length);
+      // If team page returned no rows (JS-rendered), fall back to standings page
+      if (allTableRows.length === 0 && team.nodeId) {
+        console.log('Team page appears JS-rendered, trying standings page for', team.name);
+        const standingsUrl = `https://www.legacy.hockey/standings/show/${team.nodeId}?subseason=${SUBSEASON}&tab=standings`;
+        const standingsHtml = await fetchViaProxy(standingsUrl);
+        if (standingsHtml) {
+          searchDoc = new DOMParser().parseFromString(standingsHtml, 'text/html');
+          allTableRows = searchDoc.querySelectorAll('table tbody tr');
+          console.log('Standings page rows for', team.name, ':', allTableRows.length);
+        }
+      }
       allTableRows.forEach(row => {
         const cells = row.querySelectorAll('td');
         if (cells.length >= 2 && cells[0]?.textContent?.trim() === 'Nickname:') {
