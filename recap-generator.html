@@ -740,14 +740,17 @@ async function fetchTeamNicknames(gameData) {
         }
       }
       allTableRows.forEach((row, rowIdx) => {
-        const cells = row.querySelectorAll('td');
+        const cells = row.querySelectorAll('td, th');
         const cellTexts = Array.from(cells).map(c => c.textContent.trim());
-        if (rowIdx < 15) console.log('Row', rowIdx, 'for', team.name, ':', cellTexts);
+        if (rowIdx < 15) console.log('Row', rowIdx, 'for', team.name, ':', JSON.stringify(cellTexts));
         if (cells.length >= 2 && cells[0]?.textContent?.trim() === 'Nickname:') {
           nicknames[team.name] = cells[1]?.textContent?.trim();
           console.log('Found nickname for', team.name, ':', nicknames[team.name]);
         }
       });
+      // Also log a raw HTML snippet of the first table to see its structure
+      const firstTable = searchDoc.querySelector('table');
+      if (firstTable) console.log('First table HTML snippet for', team.name, ':', firstTable.innerHTML.slice(0, 600));
     } catch(e) { console.warn('fetchTeamNicknames failed for', team.name, e.message); }
     await new Promise(r => setTimeout(r, 300));
   }
