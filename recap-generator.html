@@ -789,18 +789,25 @@ async function fetchLeaderboardContext(gameData) {
     const doc = new DOMParser().parseFromString(js, 'text/html');
     const tables = doc.querySelectorAll('table');
 
-    // Build leaderboard lookup: section -> [{name, school, value}]
+    // The JS file builds DOM dynamically — parse section names from JS source text
+    // Pattern: h4_s_most_goals.textContent = 'Most Goals'
     const leaderboards = {};
-    tables.forEach(table => {
-      let sectionName = '';
-      let el = table.closest('div')?.previousElementSibling;
-      while (el) {
-        if (el.tagName === 'H4') { sectionName = el.textContent.trim(); break; }
-        el = el.previousElementSibling;
-      }
-      if (!sectionName) return;
+    const sectionMatches = [...js.matchAll(/\.textContent\s*=\s*'([^']+)'/g)];
+    const tableMatches = [...js.matchAll(/\.innerHTML\s*=\s*`([^`]+)`/g)];
+    console.log('Section names found:', sectionMatches.map(m => m[1]));
+    console.log('Table blocks found:', tableMatches.length);
+
+    tableMatches.forEach((tableMatch, idx) => {
+      const sectionName = sectionMatches[idx + 1]?.captured || sectionMatches.find((m, i) => i <= idx + 1 && m[1] !== 'Last updated: 2026-04-12 00:28' && !m[1].includes('updated'))?.['1'] || '';
+      // Find the section name by index — skip the "Last updated" text entry
+      const validSections = sectionMatches.filter(m => !m[1].includes('updated') && !m[1].includes('Last'));
+      const section = validSections[idx]?.[1] || '';
+      if (!section) return;
+
+      const tableHtml = tableMatch[1];
+      const tableDoc = new DOMParser().parseFromString(tableHtml, 'text/html');
       const entries = [];
-      table.querySelectorAll('tbody tr').forEach(row => {
+      tableDoc.querySelectorAll('tbody tr').forEach(row => {
         const cells = row.querySelectorAll('td');
         if (cells.length < 3) return;
         entries.push({
@@ -809,7 +816,7 @@ async function fetchLeaderboardContext(gameData) {
           value: parseInt(cells[2]?.textContent?.trim()) || 0
         });
       });
-      leaderboards[sectionName] = entries;
+      if (entries.length > 0) leaderboards[section] = entries;
     });
     console.log('Leaderboard sections:', Object.keys(leaderboards));
 
