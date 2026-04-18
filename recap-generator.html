@@ -683,12 +683,12 @@ async function fetchTeamRecords(gameData) {
     { name: gameData.awayTeam, nodeId: gameData.awayNodeId },
     { name: gameData.homeTeam, nodeId: gameData.homeNodeId }
   ];
-  await Promise.all(teams.map(async team => {
-    if (!team.nodeId) { console.warn('No node ID for:', team.name); return; }
+  for (const team of teams) {
+    if (!team.nodeId) { console.warn('No node ID for:', team.name); continue; }
     try {
       const url = `https://www.legacy.hockey/standings/show/${team.nodeId}?subseason=${SUBSEASON}&tab=standings`;
       const html = await fetchViaProxy(url);
-      if (!html) return;
+      if (!html) continue;
       const doc = new DOMParser().parseFromString(html, 'text/html');
       doc.querySelectorAll('table tbody tr').forEach(row => {
         const cells = row.querySelectorAll('td');
@@ -702,7 +702,8 @@ async function fetchTeamRecords(gameData) {
         }
       });
     } catch(e) { console.warn('fetchTeamRecords failed for', team.name, e.message); }
-  }));
+    await new Promise(r => setTimeout(r, 300));
+  }
   console.log('Records fetched:', records);
   return records;
 }
@@ -714,14 +715,14 @@ async function fetchTeamNicknames(gameData) {
     { name: gameData.awayTeam, nodeId: gameData.awayNodeId, pageUrl: gameData.awayPageUrl },
     { name: gameData.homeTeam, nodeId: gameData.homeNodeId, pageUrl: gameData.homePageUrl }
   ];
-  await Promise.all(teams.map(async team => {
+  for (const team of teams) {
     console.log('Fetching nickname for:', team.name, 'pageUrl:', team.pageUrl, 'nodeId:', team.nodeId);
-    if (!team.nodeId && !team.pageUrl) { console.warn('No URL or nodeId for', team.name); return; }
+    if (!team.nodeId && !team.pageUrl) { console.warn('No URL or nodeId for', team.name); continue; }
     try {
       const url = team.pageUrl ? `${team.pageUrl}?subseason=${SUBSEASON}` : `https://www.legacy.hockey/page/show/${team.nodeId}?subseason=${SUBSEASON}`;
       console.log('Nickname fetch URL:', url);
       const html = await fetchViaProxy(url);
-      if (!html) { console.warn('No HTML returned for', team.name); return; }
+      if (!html) { console.warn('No HTML returned for', team.name); continue; }
       console.log('HTML length for', team.name, ':', html.length);
       const doc = new DOMParser().parseFromString(html, 'text/html');
       const allRows = doc.querySelectorAll('table.dataTable tbody tr');
@@ -737,7 +738,8 @@ async function fetchTeamNicknames(gameData) {
         }
       });
     } catch(e) { console.warn('fetchTeamNicknames failed for', team.name, e.message); }
-  }));
+    await new Promise(r => setTimeout(r, 300));
+  }
   console.log('Nicknames fetched:', nicknames);
   return nicknames;
 }
