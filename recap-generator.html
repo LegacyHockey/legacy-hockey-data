@@ -789,8 +789,9 @@ async function fetchLeaderboardContext(gameData) {
     const doc = new DOMParser().parseFromString(js, 'text/html');
     const tables = doc.querySelectorAll('table');
 
+    // Build leaderboard lookup: section -> [{name, school, value}]
+    const leaderboards = {};
     tables.forEach(table => {
-      // Get section header (Most Goals, Most Assists, etc.)
       let sectionName = '';
       let el = table.closest('div')?.previousElementSibling;
       while (el) {
@@ -798,48 +799,61 @@ async function fetchLeaderboardContext(gameData) {
         el = el.previousElementSibling;
       }
       if (!sectionName) return;
-
-      const rows = table.querySelectorAll('tbody tr');
-      rows.forEach((row, idx) => {
+      const entries = [];
+      table.querySelectorAll('tbody tr').forEach(row => {
         const cells = row.querySelectorAll('td');
         if (cells.length < 3) return;
-        const playerName = cells[0]?.textContent?.trim();
-        const school = cells[1]?.textContent?.trim();
-        const statValue = parseInt(cells[2]?.textContent?.trim());
+        entries.push({
+          name: cells[0]?.textContent?.trim(),
+          school: cells[1]?.textContent?.trim(),
+          value: parseInt(cells[2]?.textContent?.trim()) || 0
+        });
+      });
+      leaderboards[sectionName] = entries;
+    });
+    console.log('Leaderboard sections:', Object.keys(leaderboards));
 
-        // Check if this player appears in today's game
-        const allSkaters = [...gameData.skaters.away, ...gameData.skaters.home];
-        const allGoalies = [...gameData.goalies.away, ...gameData.goalies.home];
-        const allPlayers = [...allSkaters, ...allGoalies];
+    // All players in this game
+    const allSkaters = [...gameData.skaters.away, ...gameData.skaters.home];
+    const allGoalies = [...gameData.goalies.away, ...gameData.goalies.home];
 
-        for (const player of allPlayers) {
-          const pName = player.name?.toLowerCase() || '';
-          const lbName = playerName?.toLowerCase() || '';
-          // Match on last name at minimum
-          const lastName = pName.split(' ').pop();
-          const lbLastName = lbName.split(' ').pop();
+    // Check each leaderboard
+    for (const [sectionName, entries] of Object.entries(leaderboards)) {
+      const isGoals = sectionName.includes('Goals');
+      const isAssists = sectionName.includes('Assists');
+      const isPoints = sectionName.includes('Points');
+      const isSaves = sectionName.includes('Saves');
+      if (!isGoals && !isAssists && !isPoints && !isSaves) continue;
 
-          if (lastName && lbLastName && lastName === lbLastName &&
-              (pName.includes(lbName.split(' ')[0]) || lbName.includes(pName.split(' ')[0]))) {
+      // Get the value of the last entry (10th place cutoff)
+      const cutoff = entries.length > 0 ? entries[entries.length - 1].value : 0;
 
-            // Check if their game performance is comparable to leaderboard
-            let gameValue = 0;
-            if (sectionName.includes('Goals') && player.g) gameValue = player.g;
-            else if (sectionName.includes('Assists') && player.a) gameValue = player.a;
-            else if (sectionName.includes('Points') && player.pts) gameValue = player.pts;
-            else if (sectionName.includes('Saves') && player.sv) gameValue = player.sv;
-
-            if (gameValue > 0 && gameValue >= statValue) {
-              const rank = idx + 1;
-              if (rank <= 10) {
-                notes.push(`${playerName} (${school}): ${gameValue} ${sectionName.toLowerCase()} today ranks No. ${rank} on the season leaderboard`);
-              }
-            }
-            break;
+      // Check skaters for goals/assists/points
+      if (isGoals || isAssists || isPoints) {
+        for (const player of allSkaters) {
+          const gameValue = isGoals ? player.g : isAssists ? player.a : player.pts;
+          if (!gameValue || gameValue < cutoff) continue;
+          // Find rank
+          const rank = entries.findIndex(e => gameValue >= e.value) + 1;
+          if (rank > 0 && rank <= 10) {
+            notes.push(`${player.name}: ${gameValue} ${sectionName.toLowerCase()} ranks No. ${rank} on the season leaderboard`);
           }
         }
-      });
-    });
+      }
+
+      // Check goalies for saves
+      if (isSaves) {
+        for (const goalie of allGoalies) {
+          const gameValue = goalie.sv;
+          console.log('Checking goalie saves:', goalie.name, gameValue, 'cutoff:', cutoff);
+          if (!gameValue || gameValue < cutoff) continue;
+          const rank = entries.findIndex(e => gameValue >= e.value) + 1;
+          if (rank > 0 && rank <= 10) {
+            notes.push(`${goalie.name}: ${gameValue} saves ranks No. ${rank} on the season leaderboard`);
+          }
+        }
+      }
+    }
     console.log('Leaderboard notes:', notes);
   } catch(e) { console.warn('fetchLeaderboardContext failed:', e.message); }
   return notes;
