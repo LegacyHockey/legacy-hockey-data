@@ -403,7 +403,7 @@ TEAM RECORDS (if provided):
 - Always use W-L-T format including ties even if 0. Example: "(14-8-2)" or "(22-5-0)"
 
 STATE RANKINGS (if provided):
-- Reference rankings naturally in the story. Always include the class abbreviation in parenthesis immediately after the number — use (2A) or (1A), never spell out "Class 2A" or "Class 1A". Examples: "No. 3 (2A)-ranked Moorhead" or "No. 5 (1A) Warroad"
+- Reference rankings naturally in the story. Always include the class abbreviation in parenthesis immediately after the ranking number — use (2A) or (1A), never spell out "Class 2A" or "Class 1A". Examples: "No. 3 (2A)-ranked Moorhead" or "No. 5 (1A) Warroad"
 - Include teams from both the Top 10 and Next 10 if they appear in the data.
 - If a team is unranked, do not reference rankings for that team.
 
@@ -616,7 +616,7 @@ const TEAM_NODE_IDS = {
   // Big South
   'Albert Lea': 9113406, 'Dodge County': 9113407, 'Fairmont': 9113408, 'Farmington': 9113409,
   'Hastings': 9113529, 'Lakeville North': 9113411, 'Lakeville South': 9113412,
-  'New Prague': 9113413, 'Northfield': 9113414, 'Red Wing': 9113415,
+  'New Prague': 9113413, 'Red Wing': 9113415,
   // Central Lakes
   'Alexandria': 9113425, 'Brainerd': 9113426, 'Detroit Lakes': 9113427, 'Fergus Falls': 9113428,
   'Sartell-St. Stephen': 9113429, 'St. Cloud Apollo': 9113430, 'St. Cloud Cathedral': 9113431,
@@ -641,8 +641,8 @@ const TEAM_NODE_IDS = {
   'Two Rivers': 9113531, 'Hill-Murray': 9113533, 'Mahtomedi': 9113535,
   'St. Thomas Academy': 9113537, 'Simley': 9113539, 'South St. Paul': 9113541, 'Tartan': 9113543,
   // Metro West
-  "Benilde-St. Margaret's": 9113546, 'Bloomington Jefferson': 9113547, 'Burnsville': 9113548,
-  'Holy Angels': 9113549, 'Minnetonka': 9113550, 'Rosemount': 9113551,
+  'Bloomington Jefferson': 9113547, 'Burnsville': 9113548,
+  'Holy Angels': 9113549, 'Rosemount': 9113551,
   'St. Louis Park': 9113552, 'Wayzata': 9113553,
   // Mississippi 8
   'Centennial': 9113563, 'Forest Lake': 9113564, 'Mounds View': 9113565,
@@ -653,19 +653,17 @@ const TEAM_NODE_IDS = {
   'Maple Grove': 9113590, 'Osseo': 9113591, 'Park Center': 9113592,
   'Plymouth': 9113593, 'Robbinsdale Cooper': 9113594,
   // South Suburban
-  'Apple Valley': 9113612, 'Burnsville': 9113613, 'Eastview': 9113614,
-  'Eagan': 9113615, 'Farmington': 9113616, 'Lakeville North': 9113617,
-  'Lakeville South': 9113618, 'Rosemount': 9113619, 'Savage/Prior Lake': 9113620,
+  'Apple Valley': 9113612, 'Eastview': 9113614,
+  'Eagan': 9113615, 'Savage/Prior Lake': 9113620,
   // Suburban East
-  'East Ridge': 9113631, 'Maplewood/Hill-Murray': 9113632, 'Minnetonka': 9113633,
-  'North St. Paul': 9113634, 'Stillwater': 9113635, 'White Bear Lake': 9113636,
-  'Woodbury': 9113637, 'Park': 9113638,
+  'East Ridge': 9113631, 'Maplewood/Hill-Murray': 9113632,
+  'North St. Paul': 9113634, 'Woodbury': 9113637, 'Park': 9113638,
   // Tri-Metro
   'Cretin-Derham Hall': 9113657, 'Gentry Academy': 9113658, 'St. Paul Johnson': 9113659,
-  'South St. Paul': 9113660, 'St. Paul Como Park': 9113661,
+  'St. Paul Como Park': 9113661,
   // West Central
   'Montevideo': 9113668, 'Morris/Benson Area': 9113669, 'New London-Spicer': 9113670,
-  'Ortonville': 9113671, 'Willmar': 9113672,
+  'Ortonville': 9113671,
   // Wright County
   'Delano': 9113679, 'Litchfield/Dassel-Cokato': 9113680, 'Monticello': 9113681,
   'Moorhead': 9113522, 'Warroad': 9113480,
@@ -749,7 +747,7 @@ async function fetchStateRankings(teamNames) {
       `https://www.legacy.hockey/layout_container/show_layout_tab?layout_container_id=89666221&page_node_id=2445160&tab_element_id=271925`
     ];
 
-  const classLabels = ['2A', '1A'];
+    const classLabels = ['2A', '1A'];
     for (let ci = 0; ci < urls.length; ci++) {
       const html = await fetchViaProxy(urls[ci]);
       if (!html) continue;
@@ -785,8 +783,6 @@ async function fetchLeaderboardContext(gameData) {
     const js = await fetchViaProxy(url);
     if (!js) return notes;
 
-
-
     // Extract table data from the JS HTML string
     const doc = new DOMParser().parseFromString(js, 'text/html');
     const tables = doc.querySelectorAll('table');
@@ -800,8 +796,6 @@ async function fetchLeaderboardContext(gameData) {
     console.log('Table blocks found:', tableMatches.length);
 
     tableMatches.forEach((tableMatch, idx) => {
-      const sectionName = sectionMatches[idx + 1]?.captured || sectionMatches.find((m, i) => i <= idx + 1 && m[1] !== 'Last updated: 2026-04-12 00:28' && !m[1].includes('updated'))?.['1'] || '';
-      // Find the section name by index — skip the "Last updated" text entry
       const validSections = sectionMatches.filter(m => !m[1].includes('updated') && !m[1].includes('Last') && m[1].startsWith('Most'));
       const section = validSections[idx]?.[1] || '';
 
@@ -832,7 +826,7 @@ async function fetchLeaderboardContext(gameData) {
       const isGoals = sectionName.includes('Goals');
       const isAssists = sectionName.includes('Assists');
       const isPoints = sectionName.includes('Points');
-      const isSaves = sectionName === 'Most Saves'; // exact match only
+      const isSaves = sectionName === 'Most Saves';
       const isShutoutSaves = sectionName.includes('Shutout');
       const isShotsFaced = sectionName.includes('Shots Faced');
       if (!isGoals && !isAssists && !isPoints && !isSaves && !isShutoutSaves && !isShotsFaced) continue;
@@ -849,25 +843,22 @@ async function fetchLeaderboardContext(gameData) {
           const rank = entries.findIndex(e => gameValue >= e.value) + 1;
           if (rank > 0 && rank <= 10) {
             const statLabel = isGoals ? 'goals' : isAssists ? 'assists' : 'points';
-              const skaterRankLabel = rank === 1 ? `among the most ${statLabel} in a single game in the state this season` :
-                rank === 2 ? `the second-most ${statLabel} in a single game in the state this season` :
-                rank === 3 ? `the third-most ${statLabel} in a single game in the state this season` :
-                `among the top single-game ${statLabel} totals in the state this season (No. ${rank})`;
-              notes.push(`${player.name}: ${gameValue} ${statLabel} — ${skaterRankLabel}`);
+            const skaterRankLabel = rank === 1 ? `among the most ${statLabel} in a single game in the state this season` :
+              rank === 2 ? `the second-most ${statLabel} in a single game in the state this season` :
+              rank === 3 ? `the third-most ${statLabel} in a single game in the state this season` :
+              `among the top single-game ${statLabel} totals in the state this season (No. ${rank})`;
+            notes.push(`${player.name}: ${gameValue} ${statLabel} — ${skaterRankLabel}`);
           }
         }
       }
 
       // Check goalies for saves, shutout saves, and shots faced
-      const isShutoutSaves = sectionName.includes('Shutout');
-      const isShotsFaced = sectionName.includes('Shots Faced');
       if (isSaves || isShutoutSaves || isShotsFaced) {
         const validEntries = entries.filter(e => e.value > 0);
         if (validEntries.length === 0) continue;
         const validCutoff = validEntries[validEntries.length - 1].value;
 
         for (const goalie of allGoalies) {
-          // For saves/shutout saves use sv; for shots faced use sa
           const gameValue = isShotsFaced ? goalie.sa : goalie.sv;
           if (!gameValue || gameValue < validCutoff) continue;
           if (gameValue > validEntries[0].value) continue;
@@ -1034,7 +1025,7 @@ function formatGameData(g, enrichment) {
 
   // Add explicit shots summary
   // Away goalie SA = shots taken BY home team against away goalie
-  // Home goalie SA = shots taken BY away team against home goalie  
+  // Home goalie SA = shots taken BY away team against home goalie
   const awayTeamShots = g.goalies.home.reduce((sum, gl) => sum + gl.sa, 0);
   const homeTeamShots = g.goalies.away.reduce((sum, gl) => sum + gl.sa, 0);
   if (awayTeamShots > 0 || homeTeamShots > 0) {
@@ -1089,14 +1080,14 @@ async function generateRecap() {
     const recap = await callClaude(text);
     setLoading(false);
     // Format game title: winner first, higher score first, comma format, no leading zero in date
-  const awayScore = parseInt(gd.awayScore);
-  const homeScore = parseInt(gd.homeScore);
-  const winner = awayScore > homeScore ? gd.awayTeam : gd.homeTeam;
-  const loser = awayScore > homeScore ? gd.homeTeam : gd.awayTeam;
-  const winScore = Math.max(awayScore, homeScore);
-  const loseScore = Math.min(awayScore, homeScore);
-  const cleanDate = gd.date.replace(/\b0(\d)\b/g, '$1'); // remove leading zeros from day
-  document.getElementById('gameTitle').textContent = `${winner} ${winScore}, ${loser} ${loseScore}  |  ${cleanDate}`;
+    const awayScore = parseInt(gd.awayScore);
+    const homeScore = parseInt(gd.homeScore);
+    const winner = awayScore > homeScore ? gd.awayTeam : gd.homeTeam;
+    const loser = awayScore > homeScore ? gd.homeTeam : gd.awayTeam;
+    const winScore = Math.max(awayScore, homeScore);
+    const loseScore = Math.min(awayScore, homeScore);
+    const cleanDate = gd.date.replace(/\b0(\d)\b/g, '$1'); // remove leading zeros from day
+    document.getElementById('gameTitle').textContent = `${winner} ${winScore}, ${loser} ${loseScore}  |  ${cleanDate}`;
     document.getElementById('recapOutput').value = recap;
     document.getElementById('gameDataPreview').textContent = text;
     document.getElementById('resultSection').classList.add('visible');
