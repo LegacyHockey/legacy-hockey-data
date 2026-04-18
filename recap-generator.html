@@ -739,8 +739,10 @@ async function fetchTeamNicknames(gameData) {
           console.log('Standings page rows for', team.name, ':', allTableRows.length);
         }
       }
-      allTableRows.forEach(row => {
+      allTableRows.forEach((row, rowIdx) => {
         const cells = row.querySelectorAll('td');
+        const cellTexts = Array.from(cells).map(c => c.textContent.trim());
+        if (rowIdx < 15) console.log('Row', rowIdx, 'for', team.name, ':', cellTexts);
         if (cells.length >= 2 && cells[0]?.textContent?.trim() === 'Nickname:') {
           nicknames[team.name] = cells[1]?.textContent?.trim();
           console.log('Found nickname for', team.name, ':', nicknames[team.name]);
