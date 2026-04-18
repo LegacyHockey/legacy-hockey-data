@@ -506,17 +506,21 @@ function parseBoxscore(html) {
   teamPageLinks.forEach(a => {
     const text = a.textContent.trim().toLowerCase();
     const href = a.getAttribute('href') || '';
-    const match = href.match(/page\/show\/(\d+)-[\w-]+/);
+    const match = href.match(/page\/show\/(\d+)-([\w-]+)/);
     if (!match) return;
     const nodeId = match[1];
+    // Also try matching against the URL slug (e.g. "lake-of-the-woods" matches "Lake of the Woods")
+    const slug = match[2].replace(/-/g, ' ');
     // Use full href but strip query string for clean page URL
     const hrefClean = href.split('?')[0];
     const cleanUrl = hrefClean.startsWith('http') ? hrefClean : 'https://www.legacy.hockey' + hrefClean;
-    if (!g.awayNodeId && (text === awayLower || text.includes(awayLower) || awayLower.includes(text)) && text.length > 2) {
+    const matchesAway = (text === awayLower || text.includes(awayLower) || awayLower.includes(text) || slug === awayLower || slug.includes(awayLower) || awayLower.includes(slug)) && (text.length > 2 || slug.length > 2);
+    const matchesHome = (text === homeLower || text.includes(homeLower) || homeLower.includes(text) || slug === homeLower || slug.includes(homeLower) || homeLower.includes(slug)) && (text.length > 2 || slug.length > 2);
+    if (!g.awayNodeId && matchesAway) {
       g.awayNodeId = nodeId;
       g.awayPageUrl = cleanUrl;
     }
-    if (!g.homeNodeId && (text === homeLower || text.includes(homeLower) || homeLower.includes(text)) && text.length > 2) {
+    if (!g.homeNodeId && matchesHome) {
       g.homeNodeId = nodeId;
       g.homePageUrl = cleanUrl;
     }
@@ -844,7 +848,8 @@ async function fetchLeaderboardContext(gameData) {
           const rank = entries.findIndex(e => gameValue >= e.value) + 1;
           if (rank > 0 && rank <= 10) {
             const statLabel = isGoals ? 'goals' : isAssists ? 'assists' : 'points';
-            const skaterRankLabel = rank === 1 ? `among the most ${statLabel} in a single game in the state this season` :
+            const topCount = entries.filter(e => e.value === entries[0].value).length;
+            const skaterRankLabel = rank === 1 ? (topCount > 1 ? `tied for the most ${statLabel} in a single game in the state this season` : `the most ${statLabel} in a single game in the state this season`) :
               rank === 2 ? `the second-most ${statLabel} in a single game in the state this season` :
               rank === 3 ? `the third-most ${statLabel} in a single game in the state this season` :
               `among the top single-game ${statLabel} totals in the state this season (No. ${rank})`;
