@@ -859,6 +859,7 @@ async function fetchLeaderboardContext(gameData) {
         const validCutoff = validEntries[validEntries.length - 1].value;
 
         for (const goalie of allGoalies) {
+          if (isShutoutSaves && goalie.ga !== 0) continue;
           const gameValue = isShotsFaced ? goalie.sa : goalie.sv;
           if (!gameValue || gameValue < validCutoff) continue;
           if (gameValue > validEntries[0].value) continue;
