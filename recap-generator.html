@@ -785,6 +785,8 @@ async function fetchLeaderboardContext(gameData) {
     const js = await fetchViaProxy(url);
     if (!js) return notes;
 
+
+
     // Extract table data from the JS HTML string
     const doc = new DOMParser().parseFromString(js, 'text/html');
     const tables = doc.querySelectorAll('table');
@@ -844,7 +846,7 @@ async function fetchLeaderboardContext(gameData) {
           const rank = entries.findIndex(e => gameValue >= e.value) + 1;
           if (rank > 0 && rank <= 10) {
             const statLabel = isGoals ? 'goals' : isAssists ? 'assists' : 'points';
-              const skaterRankLabel = rank === 1 ? `the most ${statLabel} in a single game in the state this season` :
+              const skaterRankLabel = rank === 1 ? `among the most ${statLabel} in a single game in the state this season` :
                 rank === 2 ? `the second-most ${statLabel} in a single game in the state this season` :
                 rank === 3 ? `the third-most ${statLabel} in a single game in the state this season` :
                 `among the top single-game ${statLabel} totals in the state this season (No. ${rank})`;
@@ -855,11 +857,20 @@ async function fetchLeaderboardContext(gameData) {
 
       // Check goalies for saves
       if (isSaves) {
+        console.log('Most Saves entries (first 3):', entries.slice(0,3).map(e => e.name + '=' + e.value));
         for (const goalie of allGoalies) {
           const gameValue = goalie.sv;
-          console.log('Checking goalie saves:', goalie.name, gameValue, 'cutoff:', cutoff);
-          if (!gameValue || gameValue < cutoff) continue;
-          const rank = entries.findIndex(e => gameValue >= e.value) + 1;
+          if (!gameValue) continue;
+          // Only consider entries with valid positive values
+          const validEntries = entries.filter(e => e.value > 0);
+          if (validEntries.length === 0) continue;
+          const validCutoff = validEntries[validEntries.length - 1].value;
+          console.log('Goalie:', goalie.name, 'sv:', gameValue, 'validCutoff:', validCutoff, 'top:', validEntries[0].value);
+          if (gameValue < validCutoff) continue;
+          // Must actually be less than or equal to the top entry to get a meaningful rank
+          if (gameValue > validEntries[0].value) continue; // impossible but guard anyway
+          const rank = validEntries.findIndex(e => gameValue >= e.value) + 1;
+          console.log('Rank:', rank);
           if (rank > 0 && rank <= 10) {
             const rankLabel = rank === 1 ? 'the most saves in a single game in the state this season' :
               rank === 2 ? 'the second-most saves in a single game in the state this season' :
@@ -962,7 +973,7 @@ function formatGameData(g, enrichment) {
   // Enrichment: leaderboard context
   if (enrichment?.leaderboardNotes?.length) {
     L.push('');
-    L.push('SINGLE-GAME LEADERBOARD CONTEXT (weave in naturally if relevant):');
+    L.push('SINGLE-GAME LEADERBOARD CONTEXT (verify accuracy before publishing — leaderboard reflects end-of-season standings):');
     enrichment.leaderboardNotes.forEach(note => L.push(`  - ${note}`));
   }
   L.push('');
