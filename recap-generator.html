@@ -802,8 +802,9 @@ async function fetchLeaderboardContext(gameData) {
     tableMatches.forEach((tableMatch, idx) => {
       const sectionName = sectionMatches[idx + 1]?.captured || sectionMatches.find((m, i) => i <= idx + 1 && m[1] !== 'Last updated: 2026-04-12 00:28' && !m[1].includes('updated'))?.['1'] || '';
       // Find the section name by index — skip the "Last updated" text entry
-      const validSections = sectionMatches.filter(m => !m[1].includes('updated') && !m[1].includes('Last'));
+      const validSections = sectionMatches.filter(m => !m[1].includes('updated') && !m[1].includes('Last') && m[1].startsWith('Most'));
       const section = validSections[idx]?.[1] || '';
+
       if (!section) return;
 
       const tableHtml = tableMatch[1];
@@ -831,8 +832,10 @@ async function fetchLeaderboardContext(gameData) {
       const isGoals = sectionName.includes('Goals');
       const isAssists = sectionName.includes('Assists');
       const isPoints = sectionName.includes('Points');
-      const isSaves = sectionName.includes('Saves');
-      if (!isGoals && !isAssists && !isPoints && !isSaves) continue;
+      const isSaves = sectionName === 'Most Saves'; // exact match only
+      const isShutoutSaves = sectionName.includes('Shutout');
+      const isShotsFaced = sectionName.includes('Shots Faced');
+      if (!isGoals && !isAssists && !isPoints && !isSaves && !isShutoutSaves && !isShotsFaced) continue;
 
       // Get the value of the last entry (10th place cutoff)
       const cutoff = entries.length > 0 ? entries[entries.length - 1].value : 0;
@@ -855,29 +858,38 @@ async function fetchLeaderboardContext(gameData) {
         }
       }
 
-      // Check goalies for saves
-      if (isSaves) {
-        console.log('Most Saves entries (first 3):', entries.slice(0,3).map(e => e.name + '=' + e.value));
+      // Check goalies for saves, shutout saves, and shots faced
+      const isShutoutSaves = sectionName.includes('Shutout');
+      const isShotsFaced = sectionName.includes('Shots Faced');
+      if (isSaves || isShutoutSaves || isShotsFaced) {
+        const validEntries = entries.filter(e => e.value > 0);
+        if (validEntries.length === 0) continue;
+        const validCutoff = validEntries[validEntries.length - 1].value;
+
         for (const goalie of allGoalies) {
-          const gameValue = goalie.sv;
-          if (!gameValue) continue;
-          // Only consider entries with valid positive values
-          const validEntries = entries.filter(e => e.value > 0);
-          if (validEntries.length === 0) continue;
-          const validCutoff = validEntries[validEntries.length - 1].value;
-          console.log('Goalie:', goalie.name, 'sv:', gameValue, 'validCutoff:', validCutoff, 'top:', validEntries[0].value);
-          if (gameValue < validCutoff) continue;
-          // Must actually be less than or equal to the top entry to get a meaningful rank
-          if (gameValue > validEntries[0].value) continue; // impossible but guard anyway
+          // For saves/shutout saves use sv; for shots faced use sa
+          const gameValue = isShotsFaced ? goalie.sa : goalie.sv;
+          if (!gameValue || gameValue < validCutoff) continue;
+          if (gameValue > validEntries[0].value) continue;
           const rank = validEntries.findIndex(e => gameValue >= e.value) + 1;
-          console.log('Rank:', rank);
-          if (rank > 0 && rank <= 10) {
-            const rankLabel = rank === 1 ? 'the most saves in a single game in the state this season' :
+          if (rank < 1 || rank > 10) continue;
+
+          let rankLabel;
+          if (isSaves) {
+            rankLabel = rank === 1 ? 'the most saves in a single game in the state this season' :
               rank === 2 ? 'the second-most saves in a single game in the state this season' :
               rank === 3 ? 'the third-most saves in a single game in the state this season' :
               `among the top single-game save totals in the state this season (No. ${rank})`;
-            notes.push(`${goalie.name}: ${gameValue} saves — ${rankLabel}`);
+          } else if (isShutoutSaves) {
+            rankLabel = rank === 1 ? 'the most saves in a single-game shutout in the state this season' :
+              rank === 2 ? 'the second-most saves in a single-game shutout in the state this season' :
+              `among the most saves in a single-game shutout in the state this season (No. ${rank})`;
+          } else {
+            rankLabel = rank === 1 ? 'the most shots faced in a single game in the state this season' :
+              rank === 2 ? 'the second-most shots faced in a single game in the state this season' :
+              `among the most shots faced in a single game in the state this season (No. ${rank})`;
           }
+          notes.push(`${goalie.name}: ${gameValue} ${isShotsFaced ? 'shots faced' : 'saves'} — ${rankLabel}`);
         }
       }
     }
