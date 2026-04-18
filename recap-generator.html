@@ -393,7 +393,7 @@ RULES:
 - When listing shots on goal, ALWAYS name the team with MORE shots first. The team with more shots "outshot" the other. Example: if Team A had 29 shots and Team B had 38 shots, write "Team B outshot Team A 38-29." Never list the lower number first.
 - The opening sentence must always state the winner and the final score first. Never open with a deficit, lead, or any other numbers before the final score. Wrong: "North Shore rallied from a 2-1 deficit to defeat Ely 3-2..." Right: "North Shore defeated Ely 3-2 in overtime... rallying from a two-goal deficit." If referencing a deficit or lead before the score has appeared, write it out in words rather than numbers (e.g. "two-goal deficit" not "2-1 deficit").
 - Pronoun usage: use "its" when referring to a team by school name (e.g. "Moorhead won its third straight"), and "their" when referring to a team by nickname (e.g. "the Spuds won their third straight").
-- When mentioning goalies, always double-check team attribution. The goalie data clearly labels which team each goalie plays for — use that label. Never assign a goalie to the wrong team.
+- Always use "goaltender" not "goalie" when referring to a player in net.
 - When mentioning a goalie's saves, state saves and shots faced once cleanly. Do not repeat the shot total in the same sentence or follow-up sentence. Example: "Arnold made 31 saves on 35 shots" is sufficient — do not add "facing 35 shots" again. This includes phrases like "largest deficit," "longest game," "first title since," or any claim that implies historical significance. If it is not in the data, do not write it.
 - Team nicknames will be provided in the data when available. Alternate between the school name and nickname throughout the story. Never use the full school name in two consecutive references to the same team — if you just used the school name, use the nickname next, and vice versa. If no nickname is provided, use only the school name.
 - Keep the recap between 200-300 words.
@@ -412,9 +412,9 @@ PLAYOFF SEEDS (if provided):
 - Only include seeds if the data explicitly provides them.
 
 SINGLE-GAME LEADERBOARD CONTEXT (if provided):
-- If a player's performance ranks on the season leaderboard, weave that in naturally.
-- Example: "Arnold's 31 saves ranks among the top single-game performances by a goalie this season."
-- Keep leaderboard references brief — one sentence maximum per player.`;
+- If a player's performance ranks on the season leaderboard, weave that context in naturally using the exact phrasing provided in the leaderboard note.
+- Example: "Callan made 78 saves, the most in a single game in the state this season."
+- Keep leaderboard references brief — one sentence maximum per player. Never say "ranks No. X on the season leaderboard" — use the natural language description provided.`;
 
 // ── KEY MANAGEMENT ──
 const getKey = () => localStorage.getItem(KEY_STORE) || '';
@@ -843,7 +843,12 @@ async function fetchLeaderboardContext(gameData) {
           // Find rank
           const rank = entries.findIndex(e => gameValue >= e.value) + 1;
           if (rank > 0 && rank <= 10) {
-            notes.push(`${player.name}: ${gameValue} ${sectionName.toLowerCase()} ranks No. ${rank} on the season leaderboard`);
+            const statLabel = isGoals ? 'goals' : isAssists ? 'assists' : 'points';
+              const skaterRankLabel = rank === 1 ? `the most ${statLabel} in a single game in the state this season` :
+                rank === 2 ? `the second-most ${statLabel} in a single game in the state this season` :
+                rank === 3 ? `the third-most ${statLabel} in a single game in the state this season` :
+                `among the top single-game ${statLabel} totals in the state this season (No. ${rank})`;
+              notes.push(`${player.name}: ${gameValue} ${statLabel} — ${skaterRankLabel}`);
           }
         }
       }
@@ -856,7 +861,11 @@ async function fetchLeaderboardContext(gameData) {
           if (!gameValue || gameValue < cutoff) continue;
           const rank = entries.findIndex(e => gameValue >= e.value) + 1;
           if (rank > 0 && rank <= 10) {
-            notes.push(`${goalie.name}: ${gameValue} saves ranks No. ${rank} on the season leaderboard`);
+            const rankLabel = rank === 1 ? 'the most saves in a single game in the state this season' :
+              rank === 2 ? 'the second-most saves in a single game in the state this season' :
+              rank === 3 ? 'the third-most saves in a single game in the state this season' :
+              `among the top single-game save totals in the state this season (No. ${rank})`;
+            notes.push(`${goalie.name}: ${gameValue} saves — ${rankLabel}`);
           }
         }
       }
