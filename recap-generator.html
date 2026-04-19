@@ -910,20 +910,20 @@ async function fetchStateRankings(teamNames) {
         }
       });
       // Parse Next 10 from text block — rendered as a comma-separated list, not a table
-      const bodyText = doc.body?.textContent || '';
-      const next10Match = bodyText.match(/The Next 10[:\s]+([^]+?)(?:
-
-|$)/i);
-      if (next10Match) {
-        const next10Text = next10Match[1].replace(/
-/g, ' ');
-        const next10Teams = next10Text.split(',').map(t => t.trim()).filter(Boolean);
-        next10Teams.forEach((entry, idx) => {
+      const bodyText = doc.body ? doc.body.textContent : '';
+      const next10Idx = bodyText.indexOf('The Next 10');
+      if (next10Idx >= 0) {
+        const afterLabel = bodyText.slice(next10Idx).replace('The Next 10', '').replace(/^[:\s]+/, '');
+        const endIdx = afterLabel.search(/\n\s*\n|\./);
+        const next10Text = (endIdx >= 0 ? afterLabel.slice(0, endIdx) : afterLabel).replace(/\s+/g, ' ').trim();
+        const next10Teams = next10Text.split(',').map(function(t) { return t.trim(); }).filter(Boolean);
+        next10Teams.forEach(function(entry, idx) {
           const rank = 11 + idx;
-          for (const teamName of teamNames) {
-            if (entry.toLowerCase().includes(teamName.toLowerCase()) ||
-                teamName.toLowerCase().includes(entry.toLowerCase())) {
-              if (!rankings[teamName]) rankings[teamName] = { rank, classLabel };
+          for (let ti = 0; ti < teamNames.length; ti++) {
+            const teamName = teamNames[ti];
+            if (entry.toLowerCase().indexOf(teamName.toLowerCase()) >= 0 ||
+                teamName.toLowerCase().indexOf(entry.toLowerCase()) >= 0) {
+              if (!rankings[teamName]) rankings[teamName] = { rank: rank, classLabel: classLabel };
               break;
             }
           }
