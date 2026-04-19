@@ -894,28 +894,35 @@ async function fetchStateRankings(teamNames) {
       const classLabel = classLabels[ci];
 
       const doc = new DOMParser().parseFromString(html, 'text/html');
-      // Parse Top 10 from table
-      doc.querySelectorAll('table tbody tr').forEach(row => {
-        const cells = row.querySelectorAll('td');
-        if (cells.length < 4) return;
-        const rankText = cells[0]?.textContent?.trim().replace('.','');
-        const rank = parseInt(rankText);
-        if (!rank || rank > 10) return;
-        const teamCell = cells[2]?.textContent?.trim();
-        for (const teamName of teamNames) {
-          if (teamCell && (teamCell.toLowerCase().includes(teamName.toLowerCase()) ||
-              teamName.toLowerCase().includes(teamCell.toLowerCase()))) {
-            rankings[teamName] = { rank, classLabel };
-            break;
+      const bodyText = doc.body ? doc.body.textContent : '';
+      // Parse Top 10 — ranks appear as "1." "2." etc. followed by team name on next non-empty line
+      const lines = bodyText.split('\n').map(function(l) { return l.trim(); }).filter(function(l) { return l.length > 0; });
+      let lastRank = null;
+      lines.forEach(function(line) {
+        const rankMatch = line.match(/^(\d+)\.$/) ;
+        if (rankMatch) {
+          lastRank = parseInt(rankMatch[1]);
+          return;
+        }
+        if (lastRank !== null && lastRank <= 10) {
+          // Skip lines that look like records (e.g. "21-2-2") or numbers (prev rank)
+          if (/^\d+-\d+-\d+$/.test(line) || /^\d+$/.test(line)) return;
+          for (let ti = 0; ti < teamNames.length; ti++) {
+            const teamName = teamNames[ti];
+            if (line.toLowerCase().indexOf(teamName.toLowerCase()) >= 0 ||
+                teamName.toLowerCase().indexOf(line.toLowerCase()) >= 0) {
+              if (!rankings[teamName]) rankings[teamName] = { rank: lastRank, classLabel: classLabel };
+              lastRank = null;
+              break;
+            }
           }
         }
       });
-      // Parse Next 10 from text block — rendered as a comma-separated list, not a table
-      const bodyText = doc.body ? doc.body.textContent : '';
+      // Parse Next 10 — comma-separated list after "The Next 10:" label
       const next10Idx = bodyText.indexOf('The Next 10');
       if (next10Idx >= 0) {
-        const afterLabel = bodyText.slice(next10Idx).replace('The Next 10', '').replace(/^[:\s]+/, '');
-        const endIdx = afterLabel.search(/\n\s*\n|\./);
+        const afterLabel = bodyText.slice(next10Idx + 11).replace(/^[^a-zA-Z]+/, '');
+        const endIdx = afterLabel.search(/\n\s*\n/);
         const next10Text = (endIdx >= 0 ? afterLabel.slice(0, endIdx) : afterLabel).replace(/\s+/g, ' ').trim();
         const next10Teams = next10Text.split(',').map(function(t) { return t.trim(); }).filter(Boolean);
         next10Teams.forEach(function(entry, idx) {
