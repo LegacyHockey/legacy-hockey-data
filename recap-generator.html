@@ -764,21 +764,60 @@ async function fetchTeamRecords(gameData) {
   for (const team of teams) {
     if (!team.nodeId) { console.warn('No node ID for:', team.name); continue; }
     try {
-      const url = `https://www.legacy.hockey/standings/show/${team.nodeId}?subseason=${SUBSEASON}&tab=standings`;
-      const html = await fetchViaProxy(url);
-      if (!html) continue;
-      const doc = new DOMParser().parseFromString(html, 'text/html');
-      doc.querySelectorAll('table tbody tr').forEach(row => {
-        const cells = row.querySelectorAll('td');
-        if (cells.length < 10) return;
-        const rowName = cells[0]?.textContent?.trim().toLowerCase();
-        const record = cells[9]?.textContent?.trim();
+      // Try standings page first
+      const standingsUrl = `https://www.legacy.hockey/standings/show/${team.nodeId}?subseason=${SUBSEASON}&tab=standings`;
+      const html = await fetchViaProxy(standingsUrl);
+      if (html) {
+        const doc = new DOMParser().parseFromString(html, 'text/html');
         const teamLower = team.name.toLowerCase();
-        if (record && rowName &&
-            (rowName.includes(teamLower) || teamLower.includes(rowName))) {
-          records[team.name] = record;
+        doc.querySelectorAll('table tbody tr').forEach(row => {
+          const cells = row.querySelectorAll('td');
+          if (cells.length < 10) return;
+          const rowName = cells[0]?.textContent?.trim().toLowerCase();
+          const record = cells[9]?.textContent?.trim();
+          if (record && rowName &&
+              (rowName.includes(teamLower) || teamLower.includes(rowName))) {
+            records[team.name] = record;
+          }
+        });
+      }
+      // If standings page didn't have this team, try their schedule page
+      if (!records[team.name]) {
+        console.log('Standings page missing record for', team.name, '— trying schedule page');
+        const teamSlug = team.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+        const scheduleUrl = `https://www.legacy.hockey/schedule/show/${team.nodeId}-${teamSlug}?subseason=${SUBSEASON}`;
+        const schedHtml = await fetchViaProxy(scheduleUrl);
+        if (schedHtml) {
+          const schedDoc = new DOMParser().parseFromString(schedHtml, 'text/html');
+          // Schedule pages show record as "W-L-T" in a .record element or summary table
+          const recordEl = schedDoc.querySelector('.record, .team-record, [class*="record"]');
+          if (recordEl) {
+            const txt = recordEl.textContent.trim();
+            const m = txt.match(/(\d+)-(\d+)-(\d+)/);
+            if (m) { records[team.name] = m[0]; console.log('Record from schedule page for', team.name, ':', m[0]); }
+          }
+          // Also scan all text for W-L-T pattern near the team name
+          if (!records[team.name]) {
+            const bodyText = schedDoc.body?.textContent || '';
+            const m = bodyText.match(/Overall[^0-9]*(\d+)-(\d+)-(\d+)/i) ||
+                      bodyText.match(/Record[^0-9]*(\d+)-(\d+)-(\d+)/i) ||
+                      bodyText.match(/Season[^0-9]*(\d+)-(\d+)-(\d+)/i);
+            if (m) { records[team.name] = `${m[1]}-${m[2]}-${m[3]}`; console.log('Record from schedule body text for', team.name, ':', records[team.name]); }
+          }
+          // Also check summary table rows
+          if (!records[team.name]) {
+            schedDoc.querySelectorAll('table tbody tr').forEach(row => {
+              const cells = row.querySelectorAll('td');
+              if (cells.length < 2) return;
+              cells.forEach(cell => {
+                const m = cell.textContent.trim().match(/^(\d+)-(\d+)-(\d+)$/);
+                if (m) { records[team.name] = m[0]; }
+              });
+            });
+            if (records[team.name]) console.log('Record from schedule table for', team.name, ':', records[team.name]);
+          }
         }
-      });
+      }
     } catch(e) { console.warn('fetchTeamRecords failed for', team.name, e.message); }
     await new Promise(r => setTimeout(r, 300));
   }
