@@ -893,12 +893,13 @@ async function fetchStateRankings(teamNames) {
       const classLabel = classLabels[ci];
 
       const doc = new DOMParser().parseFromString(html, 'text/html');
+      // Parse Top 10 from table
       doc.querySelectorAll('table tbody tr').forEach(row => {
         const cells = row.querySelectorAll('td');
         if (cells.length < 4) return;
         const rankText = cells[0]?.textContent?.trim().replace('.','');
         const rank = parseInt(rankText);
-        if (!rank || rank > 20) return;
+        if (!rank || rank > 10) return;
         const teamCell = cells[2]?.textContent?.trim();
         for (const teamName of teamNames) {
           if (teamCell && (teamCell.toLowerCase().includes(teamName.toLowerCase()) ||
@@ -908,6 +909,26 @@ async function fetchStateRankings(teamNames) {
           }
         }
       });
+      // Parse Next 10 from text block — rendered as a comma-separated list, not a table
+      const bodyText = doc.body?.textContent || '';
+      const next10Match = bodyText.match(/The Next 10[:\s]+([^]+?)(?:
+
+|$)/i);
+      if (next10Match) {
+        const next10Text = next10Match[1].replace(/
+/g, ' ');
+        const next10Teams = next10Text.split(',').map(t => t.trim()).filter(Boolean);
+        next10Teams.forEach((entry, idx) => {
+          const rank = 11 + idx;
+          for (const teamName of teamNames) {
+            if (entry.toLowerCase().includes(teamName.toLowerCase()) ||
+                teamName.toLowerCase().includes(entry.toLowerCase())) {
+              if (!rankings[teamName]) rankings[teamName] = { rank, classLabel };
+              break;
+            }
+          }
+        });
+      }
     }
   } catch(e) { console.warn('fetchStateRankings failed:', e.message); }
   return rankings;
