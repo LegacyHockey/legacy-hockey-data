@@ -403,7 +403,8 @@ TEAM RECORDS (if provided):
 - Always use W-L-T format including ties even if 0. Example: "(14-8-2)" or "(22-5-0)"
 
 STATE RANKINGS (if provided):
-- Reference rankings naturally in the story. Always include the class abbreviation in parenthesis immediately after the ranking number — use (2A) or (1A), never spell out "Class 2A" or "Class 1A". Examples: "No. 3 (2A)-ranked Moorhead" or "No. 5 (1A) Warroad"
+- Reference rankings naturally in the story, but never in the opening sentence or first paragraph. Introduce rankings in the second or third paragraph.
+- Always include the class abbreviation in parenthesis immediately after the ranking number — use (2A) or (1A), never spell out "Class 2A" or "Class 1A". Examples: "No. 3 (2A)-ranked Moorhead" or "No. 5 (1A) Warroad"
 - Include teams from both the Top 10 and Next 10 if they appear in the data.
 - If a team is unranked, do not reference rankings for that team.
 
@@ -415,7 +416,7 @@ SINGLE-GAME LEADERBOARD CONTEXT (if provided):
 - If a player's performance ranks on the season leaderboard, you MUST weave that context into the recap using the exact phrasing provided in the leaderboard note. Do not paraphrase or omit it.
 - Example: "Callan made 78 saves, the most in a single game in the state this season."
 - Keep leaderboard references brief — one sentence maximum per player. Never say "ranks No. X on the season leaderboard" — use the natural language description provided.
-- Do NOT describe a performance as "historic," "record-breaking," "remarkable," "extraordinary," or any other superlative unless the leaderboard data explicitly supports it. "The most in a single game in the state this season" is a season-high, not a record — never use the word "record" unless the data explicitly says it is a record. Save leaderboard context for the body of the recap, not the opening sentence.`;
+- Do NOT describe a performance as "historic," "record-breaking," "remarkable," "extraordinary," or any other superlative unless the leaderboard data explicitly supports it. "The most in a single game in the state this season" is a season-high, not a record — never use the words "record," "record-breaking," "record-tying," or any variation unless the data explicitly says it is a record. Save leaderboard context for the body of the recap, not the opening sentence.`;
 
 // ── KEY MANAGEMENT ──
 const getKey = () => localStorage.getItem(KEY_STORE) || '';
@@ -879,7 +880,6 @@ async function fetchTeamNicknames(gameData) {
 // Parse state rankings from homepage Ajax tabs
 async function fetchStateRankings(teamNames) {
   const rankings = {};
-  console.log('fetchStateRankings called for:', teamNames);
   try {
     // Fetch both Class 2A and Class 1A rankings
     const urls = [
@@ -949,10 +949,7 @@ async function fetchStateRankings(teamNames) {
           }
         });
       }
-      console.log('Rankings URL', ci, '— Next10 found:', bodyText.indexOf('The Next 10') >= 0, '— body length:', bodyText.length);
-      console.log('Rankings URL', ci, 'full body:', JSON.stringify(bodyText.slice(0, 1500)));
     }
-    console.log('Rankings result:', JSON.stringify(rankings));
   } catch(e) { console.warn('fetchStateRankings failed:', e.message); }
   return rankings;
 }
