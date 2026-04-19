@@ -677,6 +677,83 @@ const TEAM_NODE_IDS = {
   'Bemidji': 9113578, 'Crookston': 9113579, 'East Grand Forks': 9113580, 'Thief River Falls': 9113581,
 };
 
+// Team nickname lookup — fallback for teams whose pages are JS-rendered
+const TEAM_NICKNAMES = {
+  // Big 9
+  'Austin': 'Packers', 'Faribault': 'Falcons', 'Mankato East': 'Cougars',
+  'Mankato West': 'Scarlets', 'Northfield': 'Raiders', 'Owatonna': 'Huskies',
+  'Rochester Century': 'Panthers', 'Rochester John Marshall': 'Rockets',
+  'Rochester Mayo': 'Spartans', 'Winona': 'Winhawks',
+  // Central Lakes
+  'Alexandria': 'Cardinals', 'Brainerd': 'Warriors', 'Detroit Lakes': 'Lakers',
+  'Fergus Falls': 'Otters', 'Sartell-St. Stephen': 'Sabres',
+  'St. Cloud Apollo': 'Eagles', 'St. Cloud Cathedral': 'Crusaders',
+  'St. Cloud Tech': 'Tigers', 'Willmar': 'Cardinals',
+  // Iron Range
+  'Eveleth-Gilbert': 'Golden Bears', 'Greenway': 'Raiders',
+  'Hibbing/Chisholm': 'Bluejackets', 'International Falls': 'Broncos',
+  'Virginia': 'Blues',
+  // Lake
+  'Chaska': 'Hawks', 'Chanhassen': 'Storm', 'Eden Prairie': 'Eagles',
+  'Edina': 'Hornets', 'Hopkins': 'Royals', 'Minnetonka': 'Skippers',
+  'Prior Lake': 'Lakers', 'Shakopee': 'Sabers',
+  // Lake Superior
+  'Cloquet-Esko-Carlton': 'Lumberjacks', 'Duluth Denfeld': 'Hunters',
+  'Duluth East': 'Greyhounds', 'Duluth Marshall': 'Hilltoppers',
+  'Hermantown': 'Hawks', 'Proctor/Hermantown': 'Rails', 'Two Harbors': 'Agates',
+  // Metro East
+  'Hill-Murray': 'Pioneers', 'Mahtomedi': 'Zephyrs',
+  'St. Thomas Academy': 'Cadets', 'Simley': 'Spartans',
+  'South St. Paul': 'Packers', 'Tartan': 'Titans', 'Two Rivers': 'Fox',
+  // Metro West / Lake
+  'Bloomington Jefferson': 'Jaguars', 'Burnsville': 'Blaze',
+  'Holy Angels': 'Stars', 'Rosemount': 'Irish',
+  'St. Louis Park': 'Orioles', 'Wayzata': 'Trojans',
+  // Mississippi 8
+  'Centennial': 'Cougars', 'Forest Lake': 'Rangers', 'Mounds View': 'Mustangs',
+  'Spring Lake Park': 'Panthers', 'Stillwater': 'Ponies',
+  'White Bear Lake': 'Bears',
+  // Northwest Suburban
+  'Armstrong/Cooper': 'Falcons', 'Buffalo': 'Bison',
+  'Champlin Park': 'Rebels', 'Maple Grove': 'Crimson',
+  'Osseo': 'Orioles', 'Park Center': 'Raiders', 'Plymouth': 'Panthers',
+  'Robbinsdale Cooper': 'Hawks',
+  // South Suburban / Big South
+  'Apple Valley': 'Eagles', 'Dodge County': 'Wildcats', 'Eastview': 'Lightning',
+  'Eagan': 'Wildcats', 'Farmington': 'Tigers', 'Hastings': 'Raiders',
+  'Lakeville North': 'Panthers', 'Lakeville South': 'Cougars',
+  'New Prague': 'Trojans', 'Red Wing': 'Wingers',
+  // Suburban East
+  'East Ridge': 'Raptors', 'Maplewood/Hill-Murray': 'Pioneers',
+  'North St. Paul': 'Polars', 'Woodbury': 'Royals', 'Park': 'Wolfpack',
+  // Tri-Metro / IMAC
+  'Academy of Holy Angels': 'Stars', "Benilde-St. Margaret's": 'Red Knights',
+  'Blake': 'Bears', 'Breck': 'Mustangs', 'Cretin-Derham Hall': 'Raiders',
+  'Gentry Academy': 'Stars', 'St. Paul Johnson': 'Governors',
+  'St. Paul Como Park': 'Cougars',
+  // Northwest
+  'Bemidji': 'Lumberjacks', 'Crookston': 'Pirates',
+  'East Grand Forks': 'Green Wave', 'Thief River Falls': 'Prowlers',
+  // West Central / Wright County
+  'Delano': 'Tigers', 'Detroit Lakes': 'Lakers',
+  'Litchfield/Dassel-Cokato': 'Dragons', 'Monticello': 'Magic',
+  'Montevideo': 'Thunder Hawks', 'Morris/Benson Area': 'Tigers',
+  'New London-Spicer': 'Wildcats', 'Ortonville': 'Trojans',
+  // Northwest / Border
+  'Moorhead': 'Spuds', 'Warroad': 'Warriors',
+  // Northern / 1A
+  'Lake of the Woods': 'Bears', 'Baudette': 'Panthers',
+  'Roseau': 'Rams', 'Ely': 'Timberwolves',
+  'Grand Rapids': 'Thunderhawks', 'Hibbing': 'Bluejackets',
+  'Chisholm': 'Bluestreaks', 'Tower-Soudan': 'Lakers',
+  'Cook County': 'Vikings', 'Mesabi East': 'Giants',
+  'Mountain Iron-Buhl': 'Rangers', 'North Branch': 'Vikings',
+  'Pequot Lakes': 'Patriots', 'Pine City': 'Dragons',
+  'Proctor': 'Rails', 'Rockford': 'Rockets',
+  'Sauk Rapids-Rice': 'Storm', 'Sartell': 'Sabres',
+  'St. Francis': 'Knights', 'Zimmerman': 'Thunder',
+};
+
 // Fetch team records using node IDs extracted from the boxscore page
 async function fetchTeamRecords(gameData) {
   const records = {};
@@ -737,36 +814,23 @@ async function fetchTeamNicknames(gameData) {
       let allTableRows = searchDoc.querySelectorAll('table tbody tr');
       console.log('All table rows for', team.name, ':', allTableRows.length);
       // If team page returned no rows (JS-rendered), fall back to standings page
-      if (allTableRows.length === 0 && team.nodeId) {
-        // Team page is JS-rendered — log raw HTML snippet to find where nickname data lives
-        console.log('Team page JS-rendered for', team.name, '— searching raw HTML for nickname data');
-        const lcHtml = html.toLowerCase();
-        const nickIdx = lcHtml.indexOf('nickname');
-        if (nickIdx >= 0) {
-          console.log('RAW nickname context:', html.slice(Math.max(0, nickIdx - 100), nickIdx + 300));
+      if (allTableRows.length === 0) {
+        // Team page is JS-rendered — fall back to hardcoded nickname table
+        const hardcoded = TEAM_NICKNAMES[team.name];
+        if (hardcoded) {
+          nicknames[team.name] = hardcoded;
+          console.log('Nickname from lookup table for', team.name, ':', hardcoded);
         } else {
-          console.log('No nickname string found in raw HTML at all');
-          // Log all <script> tag contents to find data blobs
-          const scriptMatches = [...html.matchAll(/<script[^>]*>([\s\S]*?)<\/script>/gi)];
-          console.log('Script blocks found:', scriptMatches.length);
-          scriptMatches.forEach((m, i) => {
-            const s = m[1].trim();
-            if (s.length > 50) console.log('Script', i, '(' + s.length + ' chars):', s.slice(0, 400));
-          });
+          console.warn('No nickname found in lookup table for', team.name);
         }
       }
-      allTableRows.forEach((row, rowIdx) => {
-        const cells = row.querySelectorAll('td, th');
-        const cellTexts = Array.from(cells).map(c => c.textContent.trim());
-        if (rowIdx < 15) console.log('Row', rowIdx, 'for', team.name, ':', JSON.stringify(cellTexts));
+      allTableRows.forEach(row => {
+        const cells = row.querySelectorAll('td');
         if (cells.length >= 2 && cells[0]?.textContent?.trim() === 'Nickname:') {
           nicknames[team.name] = cells[1]?.textContent?.trim();
           console.log('Found nickname for', team.name, ':', nicknames[team.name]);
         }
       });
-      // Also log a raw HTML snippet of the first table to see its structure
-      const firstTable = searchDoc.querySelector('table');
-      if (firstTable) console.log('First table HTML snippet for', team.name, ':', firstTable.innerHTML.slice(0, 600));
     } catch(e) { console.warn('fetchTeamNicknames failed for', team.name, e.message); }
     await new Promise(r => setTimeout(r, 300));
   }
