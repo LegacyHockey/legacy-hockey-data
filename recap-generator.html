@@ -720,9 +720,17 @@ async function fetchTeamNicknames(gameData) {
     console.log('Fetching nickname for:', team.name, 'pageUrl:', team.pageUrl, 'nodeId:', team.nodeId);
     if (!team.nodeId && !team.pageUrl) { console.warn('No URL or nodeId for', team.name); continue; }
     try {
-      const url = team.pageUrl ? `${team.pageUrl}?subseason=${SUBSEASON}` : `https://www.legacy.hockey/page/show/${team.nodeId}?subseason=${SUBSEASON}`;
-      console.log('Nickname fetch URL:', url);
-      const html = await fetchViaProxy(url);
+      // Build slug from team name: lowercase, spaces to hyphens, remove non-alphanumeric
+      const teamSlug = team.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+      const urlWithSlug = `https://www.legacy.hockey/page/show/${team.nodeId}-${teamSlug}?subseason=${SUBSEASON}`;
+      const urlNoSlug = `https://www.legacy.hockey/page/show/${team.nodeId}?subseason=${SUBSEASON}`;
+      console.log('Nickname fetch URL (with slug):', urlWithSlug);
+      let html = await fetchViaProxy(urlWithSlug);
+      // If slug URL returns too-short response, try without slug
+      if (!html || html.length < 10000) {
+        console.log('Slug URL returned short/empty response, trying no-slug URL');
+        html = await fetchViaProxy(urlNoSlug);
+      }
       if (!html) { console.warn('No HTML returned for', team.name); continue; }
       console.log('HTML length for', team.name, ':', html.length);
       let searchDoc = new DOMParser().parseFromString(html, 'text/html');
@@ -730,13 +738,21 @@ async function fetchTeamNicknames(gameData) {
       console.log('All table rows for', team.name, ':', allTableRows.length);
       // If team page returned no rows (JS-rendered), fall back to standings page
       if (allTableRows.length === 0 && team.nodeId) {
-        console.log('Team page appears JS-rendered, trying standings page for', team.name);
-        const standingsUrl = `https://www.legacy.hockey/standings/show/${team.nodeId}?subseason=${SUBSEASON}&tab=standings`;
-        const standingsHtml = await fetchViaProxy(standingsUrl);
-        if (standingsHtml) {
-          searchDoc = new DOMParser().parseFromString(standingsHtml, 'text/html');
-          allTableRows = searchDoc.querySelectorAll('table tbody tr');
-          console.log('Standings page rows for', team.name, ':', allTableRows.length);
+        // Team page is JS-rendered — log raw HTML snippet to find where nickname data lives
+        console.log('Team page JS-rendered for', team.name, '— searching raw HTML for nickname data');
+        const lcHtml = html.toLowerCase();
+        const nickIdx = lcHtml.indexOf('nickname');
+        if (nickIdx >= 0) {
+          console.log('RAW nickname context:', html.slice(Math.max(0, nickIdx - 100), nickIdx + 300));
+        } else {
+          console.log('No nickname string found in raw HTML at all');
+          // Log all <script> tag contents to find data blobs
+          const scriptMatches = [...html.matchAll(/<script[^>]*>([\s\S]*?)<\/script>/gi)];
+          console.log('Script blocks found:', scriptMatches.length);
+          scriptMatches.forEach((m, i) => {
+            const s = m[1].trim();
+            if (s.length > 50) console.log('Script', i, '(' + s.length + ' chars):', s.slice(0, 400));
+          });
         }
       }
       allTableRows.forEach((row, rowIdx) => {
