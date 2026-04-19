@@ -410,7 +410,9 @@ STATE RANKINGS (if provided):
 
 PLAYOFF SEEDS (if provided):
 - For section/state tournament games, reference seeds naturally. Examples: "Minnetonka, the No. 1 seed..." or "Moorhead, seeded No. 2..."
+- Section seeds appear under SECTION SEEDS. State seeds appear under STATE SEEDS (if separately provided).
 - Only include seeds if the data explicitly provides them.
+- Do not reference seeds in the opening sentence. Introduce seeds in the second or third paragraph.
 
 SINGLE-GAME LEADERBOARD CONTEXT (if provided):
 - If a player's performance ranks on the season leaderboard, you MUST weave that context into the recap using the exact phrasing provided in the leaderboard note. Do not paraphrase or omit it.
@@ -954,6 +956,74 @@ async function fetchStateRankings(teamNames) {
   return rankings;
 }
 
+// Section bracket page URLs — keyed by section name as it appears in tournament context
+const SECTION_BRACKET_URLS = {
+  'Section 1A':  'https://www.legacy.hockey/page/show/5630948-section-1a',
+  'Section 2A':  'https://www.legacy.hockey/page/show/5630953-section-2a',
+  'Section 3A':  'https://www.legacy.hockey/page/show/5621476-section-3a',
+  'Section 4A':  'https://www.legacy.hockey/page/show/5631131-section-4a',
+  'Section 5A':  'https://www.legacy.hockey/page/show/5631258-section-5a',
+  'Section 6A':  'https://www.legacy.hockey/page/show/5621500-section-6a',
+  'Section 7A':  'https://www.legacy.hockey/page/show/5621489-section-7a',
+  'Section 8A':  'https://www.legacy.hockey/page/show/5622558',
+  'Section 1AA': 'https://www.legacy.hockey/page/show/5630464-section-1aa',
+  'Section 2AA': 'https://www.legacy.hockey/page/show/5629470-section-2aa',
+  'Section 3AA': 'https://www.legacy.hockey/page/show/5630944-section-3aa',
+  'Section 4AA': 'https://www.legacy.hockey/page/show/5630946-section-4aa',
+  'Section 5AA': 'https://www.legacy.hockey/page/show/5629584-section-5aa',
+  'Section 6AA': 'https://www.legacy.hockey/page/show/5629525-section-6aa',
+  'Section 7AA': 'https://www.legacy.hockey/page/show/5625099',
+  'Section 8AA': 'https://www.legacy.hockey/page/show/5621507-section-8aa',
+};
+
+// Extract section name from tournament context string
+// e.g. "Section 4AA Playoffs - Semifinal" -> "Section 4AA"
+//      "Section 1A Playoffs - Quarterfinal" -> "Section 1A"
+function extractSectionName(tournamentContext) {
+  if (!tournamentContext) return null;
+  const m = tournamentContext.match(/Section\s+(\d+AA|\d+A)/i);
+  if (!m) return null;
+  return 'Section ' + m[1].toUpperCase();
+}
+
+// Fetch section seeds from bracket page
+// Returns object like { 'Dodge County': 3, 'Winona': 6 }
+async function fetchSectionSeeds(tournamentContext, teamNames) {
+  const seeds = {};
+  const sectionName = extractSectionName(tournamentContext);
+  if (!sectionName) return seeds;
+  const bracketUrl = SECTION_BRACKET_URLS[sectionName];
+  if (!bracketUrl) { console.warn('No bracket URL for section:', sectionName); return seeds; }
+  try {
+    const html = await fetchViaProxy(bracketUrl + '?subseason=' + SUBSEASON);
+    if (!html) return seeds;
+    const doc = new DOMParser().parseFromString(html, 'text/html');
+    // Each seeded team is in <li class="team team-top"> or <li class="team team-bottom">
+    // Text content is like "3 Dodge County" — seed number followed by team name
+    doc.querySelectorAll('li.team').forEach(li => {
+      // Remove score span text to isolate seed + team name
+      const scoreSpan = li.querySelector('.score');
+      const scoreText = scoreSpan ? scoreSpan.textContent.trim() : '';
+      let text = li.textContent.trim();
+      if (scoreText) text = text.replace(scoreText, '').trim();
+      // Split into seed number and team name
+      const m = text.match(/^(\d+)\s+(.+)$/);
+      if (!m) return;
+      const seed = parseInt(m[1]);
+      const bracketTeam = m[2].trim();
+      // Match against our two teams
+      for (const teamName of teamNames) {
+        if (bracketTeam.toLowerCase().includes(teamName.toLowerCase()) ||
+            teamName.toLowerCase().includes(bracketTeam.toLowerCase())) {
+          if (!seeds[teamName]) seeds[teamName] = seed;
+          break;
+        }
+      }
+    });
+  } catch(e) { console.warn('fetchSectionSeeds failed:', e.message); }
+  return seeds;
+}
+
 // Parse single-game leaders from GitHub JS file
 async function fetchLeaderboardContext(gameData) {
   const notes = [];
@@ -1150,6 +1220,18 @@ function formatGameData(g, enrichment) {
     }
   }
 
+  // Enrichment: section seeds
+  if (enrichment?.sectionSeeds) {
+    const awaySeed = enrichment.sectionSeeds[g.awayTeam];
+    const homeSeed = enrichment.sectionSeeds[g.homeTeam];
+    if (awaySeed || homeSeed) {
+      L.push('');
+      L.push('SECTION SEEDS (reference naturally — e.g. "Minnetonka, the No. 1 seed" or "Moorhead, seeded No. 2"):');
+      if (awaySeed) L.push(`  ${g.awayTeam}: No. ${awaySeed} seed`);
+      if (homeSeed) L.push(`  ${g.homeTeam}: No. ${homeSeed} seed`);
+    }
+  }
+
   // Enrichment: leaderboard context
   if (enrichment?.leaderboardNotes?.length) {
     L.push('');
@@ -1243,13 +1325,14 @@ async function generateRecap() {
     // Fetch enrichment data in parallel
     setLoading(true, 'Fetching records, rankings & leaderboard data...');
     const teamNames = [gd.awayTeam, gd.homeTeam];
-    const [records, rankings, leaderboardNotes, nicknames] = await Promise.all([
+    const [records, rankings, leaderboardNotes, nicknames, sectionSeeds] = await Promise.all([
       fetchTeamRecords(gd),
       fetchStateRankings(teamNames),
       fetchLeaderboardContext(gd),
-      fetchTeamNicknames(gd)
+      fetchTeamNicknames(gd),
+      fetchSectionSeeds(gd.location, teamNames)
     ]);
-    const enrichment = { records, rankings, leaderboardNotes, nicknames };
+    const enrichment = { records, rankings, leaderboardNotes, nicknames, sectionSeeds };
 
     const text = formatGameData(gd, enrichment);
     lastData = text;
