@@ -1221,7 +1221,7 @@ function formatGameData(g, enrichment) {
     const homeSeed = enrichment.sectionSeeds[g.homeTeam];
     if (awaySeed || homeSeed) {
       L.push('');
-      L.push('SECTION SEEDS (reference naturally — e.g. "Minnetonka, the No. 1 seed" or "Moorhead, seeded No. 2"):');
+      L.push('SECTION SEEDS (introduce in the first paragraph, second sentence or later — e.g. "The fourth-seeded Eagles..." or "Moorhead, the No. 2 seed,..."):');
       if (awaySeed) L.push(`  ${g.awayTeam}: No. ${awaySeed} seed`);
       if (homeSeed) L.push(`  ${g.homeTeam}: No. ${homeSeed} seed`);
     }
