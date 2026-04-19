@@ -677,6 +677,19 @@ const TEAM_NODE_IDS = {
   'Bemidji': 9113578, 'Crookston': 9113579, 'East Grand Forks': 9113580, 'Thief River Falls': 9113581,
 };
 
+// Team name -> conference standings node ID
+// Used when the team page node ID doesn't match any conference standings page
+const TEAM_STANDINGS_NODE = {
+  'Lake of the Woods': 9113582,
+  'Baudette': 9113582,
+  'Roseau': 9113582,
+  'Warroad': 9113582,
+  'East Grand Forks': 9113580,
+  'Crookston': 9113579,
+  'Thief River Falls': 9113581,
+  'Bemidji': 9113578,
+};
+
 // Team nickname lookup — fallback for teams whose pages are JS-rendered
 const TEAM_NICKNAMES = {
   // Big 9
@@ -764,8 +777,9 @@ async function fetchTeamRecords(gameData) {
   for (const team of teams) {
     if (!team.nodeId) { console.warn('No node ID for:', team.name); continue; }
     try {
-      // Try standings page first
-      const standingsUrl = `https://www.legacy.hockey/standings/show/${team.nodeId}?subseason=${SUBSEASON}&tab=standings`;
+      // Try standings page — use known conference standings node ID if available, else fall back to team node ID
+      const standingsNodeId = TEAM_STANDINGS_NODE[team.name] || team.nodeId;
+      const standingsUrl = `https://www.legacy.hockey/standings/show/${standingsNodeId}?subseason=${SUBSEASON}&tab=standings`;
       const html = await fetchViaProxy(standingsUrl);
       if (html) {
         const doc = new DOMParser().parseFromString(html, 'text/html');
