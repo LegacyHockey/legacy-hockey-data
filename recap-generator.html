@@ -412,7 +412,7 @@ PLAYOFF SEEDS (if provided):
 - For section/state tournament games, reference seeds naturally. Examples: "Minnetonka, the No. 1 seed..." or "Moorhead, seeded No. 2..."
 - Section seeds appear under SECTION SEEDS. State seeds appear under STATE SEEDS (if separately provided).
 - Only include seeds if the data explicitly provides them.
-- Do not reference seeds in the opening sentence. Introduce seeds in the second or third paragraph.
+- Reference seeds in the first paragraph, but not the opening sentence. Weave them in naturally after the score has been established.
 
 SINGLE-GAME LEADERBOARD CONTEXT (if provided):
 - If a player's performance ranks on the season leaderboard, you MUST weave that context into the recap using the exact phrasing provided in the leaderboard note. Do not paraphrase or omit it.
@@ -996,11 +996,11 @@ async function fetchSectionSeeds(tournamentContext, teamNames) {
   if (!bracketUrl) { console.warn('No bracket URL for section:', sectionName); return seeds; }
   try {
     const html = await fetchViaProxy(bracketUrl + '?subseason=' + SUBSEASON);
-    if (!html) return seeds;
+    if (!html) { console.warn('fetchSectionSeeds: no HTML returned for', sectionName); return seeds; }
     const doc = new DOMParser().parseFromString(html, 'text/html');
-    // Each seeded team is in <li class="team team-top"> or <li class="team team-bottom">
-    // Text content is like "3 Dodge County" — seed number followed by team name
-    doc.querySelectorAll('li.team').forEach(li => {
+    const liItems = doc.querySelectorAll('li.team');
+    console.log('fetchSectionSeeds:', sectionName, '— li.team count:', liItems.length);
+    liItems.forEach(li => {
       // Remove score span text to isolate seed + team name
       const scoreSpan = li.querySelector('.score');
       const scoreText = scoreSpan ? scoreSpan.textContent.trim() : '';
@@ -1008,9 +1008,10 @@ async function fetchSectionSeeds(tournamentContext, teamNames) {
       if (scoreText) text = text.replace(scoreText, '').trim();
       // Split into seed number and team name
       const m = text.match(/^(\d+)\s+(.+)$/);
-      if (!m) return;
+      if (!m) { console.log('fetchSectionSeeds: no seed match for text:', JSON.stringify(text)); return; }
       const seed = parseInt(m[1]);
       const bracketTeam = m[2].trim();
+      console.log('fetchSectionSeeds: found bracket entry — seed', seed, 'team', bracketTeam);
       // Match against our two teams
       for (const teamName of teamNames) {
         if (bracketTeam.toLowerCase().includes(teamName.toLowerCase()) ||
@@ -1020,6 +1021,7 @@ async function fetchSectionSeeds(tournamentContext, teamNames) {
         }
       }
     });
+    console.log('fetchSectionSeeds result:', JSON.stringify(seeds));
   } catch(e) { console.warn('fetchSectionSeeds failed:', e.message); }
   return seeds;
 }
