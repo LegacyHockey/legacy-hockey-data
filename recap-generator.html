@@ -879,6 +879,7 @@ async function fetchTeamNicknames(gameData) {
 // Parse state rankings from homepage Ajax tabs
 async function fetchStateRankings(teamNames) {
   const rankings = {};
+  console.log('fetchStateRankings called for:', teamNames);
   try {
     // Fetch both Class 2A and Class 1A rankings
     const urls = [
