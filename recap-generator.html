@@ -931,6 +931,7 @@ async function fetchStateRankings(teamNames) {
         });
       }
       console.log('Rankings URL', ci, '— Next10 found:', bodyText.indexOf('The Next 10') >= 0, '— body length:', bodyText.length);
+      console.log('Rankings URL', ci, 'full body:', JSON.stringify(bodyText.slice(0, 1500)));
     }
     console.log('Rankings result:', JSON.stringify(rankings));
   } catch(e) { console.warn('fetchStateRankings failed:', e.message); }
