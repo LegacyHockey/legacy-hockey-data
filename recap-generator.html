@@ -416,8 +416,8 @@ PLAYOFF SEEDS (if provided):
 
 FRESHMAN/SOPHOMORE/DEFENSEMAN SEASON LEADERS (if provided):
 - If a player ranks in the top 10 among freshmen, sophomores, or defensemen statewide in goals, assists, or points, weave that context into the recap naturally — but only for players who had a significant performance tonight (2+ goals or 2+ points).
-- Use the exact phrasing provided. Example: "Storey leads all sophomores in the state in points this season with 88."
-- One sentence maximum per player. Place in the middle of the recap, not the opening or closing paragraph.
+- Use the exact phrasing provided. The note may include multiple stats for the same player — include all of them. Example: "Palmer leads all sophomores in the state in points this season with 81. Palmer also leads in assists (48) and is tied for the lead in goals (33)."
+- Place in the middle of the recap, not the opening or closing paragraph.
 - Do not invent or modify the ranking or totals provided.
 
 SINGLE-GAME LEADERBOARD CONTEXT (if provided):
@@ -1056,43 +1056,71 @@ async function fetchClassLeaderboards(gameData) {
     // Qualify: player must have 2+ goals or 2+ points tonight
     const qualifyingSkaters = allSkaters.filter(s => s.g >= 2 || s.pts >= 2);
 
+    // Build leaderboards for all nine category/stat combos
+    const leaderboards = {};
     for (const cat of categories) {
-      const leaderboard = players
-        .filter(cat.filter)
-        .sort((a, b) => b[cat.stat] - a[cat.stat])
-        .slice(0, 10);
+      const key = cat.label + '_' + cat.stat;
+      leaderboards[key] = {
+        cat,
+        entries: players.filter(cat.filter).sort((a, b) => b[cat.stat] - a[cat.stat]).slice(0, 10)
+      };
+    }
 
-      const cutoff = leaderboard.length > 0 ? leaderboard[leaderboard.length - 1][cat.stat] : 0;
+    // For each qualifying skater, collect all category/stat combos where they rank top 10
+    for (const skater of qualifyingSkaters) {
+      const skaterLower = skater.name.toLowerCase().replace(/[^a-z\s]/g, '').trim();
 
-      for (const skater of qualifyingSkaters) {
-        // Match skater name against leaderboard entries
-        const skaterLower = skater.name.toLowerCase().replace(/[^a-z\s]/g, '').trim();
-        const entry = leaderboard.find(p => {
+      // Group findings by class/position label
+      const findings = {}; // { 'freshman': [{stat, rank, value, entry}], ... }
+
+      for (const [key, lb] of Object.entries(leaderboards)) {
+        const rank = lb.entries.findIndex(p => {
           const pLower = p.name.toLowerCase().replace(/[^a-z\s]/g, '').trim();
           return pLower === skaterLower || pLower.includes(skaterLower) || skaterLower.includes(pLower);
         });
-        if (!entry) continue;
+        if (rank < 0) continue;
+        const entry = lb.entries[rank];
+        const label = lb.cat.label;
+        if (!findings[label]) findings[label] = { entry, stats: [] };
+        findings[label].stats.push({ stat: lb.cat.stat, statLabel: lb.cat.statLabel, rank: rank + 1, value: entry[lb.cat.stat] });
+      }
 
-        const rank = leaderboard.findIndex(p => {
-          const pLower = p.name.toLowerCase().replace(/[^a-z\s]/g, '').trim();
-          return pLower === skaterLower || pLower.includes(skaterLower) || skaterLower.includes(pLower);
-        }) + 1;
-        if (rank < 1 || rank > 10) continue;
+      // Build one note per class/position label, combining all stats
+      for (const [label, data] of Object.entries(findings)) {
+        const { entry, stats } = data;
 
-        const rankWord = rank === 1 ? 'leads' :
-          rank === 2 ? 'ranks second among' :
-          rank === 3 ? 'ranks third among' :
-          rank === 4 ? 'ranks fourth among' :
-          rank === 5 ? 'ranks fifth among' :
-          `ranks No. ${rank} among`;
+        // Sort stats: points first, then goals, then assists
+        const statOrder = ['points', 'goals', 'assists'];
+        stats.sort((a, b) => statOrder.indexOf(a.stat) - statOrder.indexOf(b.stat));
 
-        const verb = rank === 1 ? `leads all ${cat.label}s` : `${rankWord} ${cat.label}s`;
-        const note = `${entry.name} (${cat.label}): ${verb} in the state in ${cat.statLabel} this season with ${entry[cat.stat]} ${cat.statLabel}`;
+        const rankPhrase = (rank, label, stat, value) => {
+          const tiedCheck = (lb) => lb.entries.filter(p => p[stat] === value).length > 1;
+          const lb = leaderboards[label + '_' + stat];
+          const tied = lb && tiedCheck(lb) && rank === 1;
+          if (rank === 1 && !tied) return `leads all ${label}s in the state in ${stat} this season with ${value}`;
+          if (rank === 1 && tied)  return `is tied for the lead among ${label}s in the state in ${stat} this season with ${value}`;
+          const ordinals = ['','first','second','third','fourth','fifth','sixth','seventh','eighth','ninth','tenth'];
+          return `ranks ${ordinals[rank] || 'No. ' + rank} among ${label}s in the state in ${stat} this season with ${value}`;
+        };
 
-        // Avoid duplicate notes for same player/stat combo
-        if (!notes.find(n => n.includes(entry.name) && n.includes(cat.statLabel) && n.includes(cat.label))) {
-          notes.push(note);
+        // Primary note: lead stat
+        const primary = stats[0];
+        let note = `${entry.name} ${rankPhrase(primary.rank, label, primary.stat, primary.value)}`;
+
+        // Additional stats as a follow-up clause
+        if (stats.length > 1) {
+          const extras = stats.slice(1).map(s => {
+            const lb = leaderboards[label + '_' + s.stat];
+            const tied = lb && lb.entries.filter(p => p[s.stat] === s.value).length > 1 && s.rank === 1;
+            if (s.rank === 1 && !tied) return `leads in ${s.statLabel} (${s.value})`;
+            if (s.rank === 1 && tied)  return `is tied for the lead in ${s.statLabel} (${s.value})`;
+            const ordinals = ['','first','second','third','fourth','fifth','sixth','seventh','eighth','ninth','tenth'];
+            return `ranks ${ordinals[s.rank] || 'No. ' + s.rank} in ${s.statLabel} (${s.value})`;
+          });
+          note += `. ${entry.name} also ${extras.join(' and ')}`;
         }
+
+        notes.push(note);
       }
     }
   } catch(e) { console.warn('fetchClassLeaderboards failed:', e.message); }
