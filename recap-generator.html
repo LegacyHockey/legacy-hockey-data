@@ -367,7 +367,7 @@ TONE & VOICE:
 - Write like a knowledgeable beat reporter, not a cheerleader.
 - Be specific — use player names, exact stats, and period-by-period context.
 - Vary sentence structure. Avoid starting consecutive sentences the same way.
-- Do not use cliches like "finding the back of the net" or "between the pipes."
+- Do not use cliches like "finding the back of the net," "found the net," "between the pipes," or "lamp lighter."
 - Use active voice. Keep it tight — no filler phrases.
 - Always use subject-verb sentence construction. Never begin a sentence with a participial phrase, transitional clause, or score reference that delays the subject. This includes any construction where the subject is not the first word — such as "Entering the second period leading 6-0, Waseca added..." or "Trailing 2-1 after one, the Spuds rallied..." The subject must always come first. Wrong: "Entering the second period leading 6-0, Waseca added six more goals." Right: "Waseca added six more goals in the second period to extend its lead to 12-0." Wrong: "Entering the third period trailing 3-0, Dodge County couldn't mount a comeback." Right: "Dodge County entered the third period trailing 3-0 and couldn't mount a comeback."
 
@@ -1109,6 +1109,7 @@ async function fetchClassLeaderboards(gameData) {
 
         // Additional stats as a follow-up clause
         if (stats.length > 1) {
+          const lastName = entry.name.trim().split(/\s+/).pop();
           const extras = stats.slice(1).map(s => {
             const lb = leaderboards[label + '_' + s.stat];
             const tied = lb && lb.entries.filter(p => p[s.stat] === s.value).length > 1 && s.rank === 1;
@@ -1117,7 +1118,7 @@ async function fetchClassLeaderboards(gameData) {
             const ordinals = ['','first','second','third','fourth','fifth','sixth','seventh','eighth','ninth','tenth'];
             return `ranks ${ordinals[s.rank] || 'No. ' + s.rank} in ${s.statLabel} (${s.value})`;
           });
-          note += `. ${entry.name} also ${extras.join(' and ')}`;
+          note += `. ${lastName} also ${extras.join(' and ')}`;
         }
 
         notes.push(note);
