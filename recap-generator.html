@@ -414,6 +414,12 @@ PLAYOFF SEEDS (if provided):
 - Only include seeds if the data explicitly provides them.
 - Seeds MUST appear in the first paragraph, in the second sentence or later. Never in the opening sentence. Example: "Rochester Lourdes defeated Albert Lea 5-3 in a Section 1A quarterfinal. The fourth-seeded Eagles scored twice in the third period to break a 3-3 tie..." Do not save seeds for the second or third paragraph.
 
+FRESHMAN/SOPHOMORE/DEFENSEMAN SEASON LEADERS (if provided):
+- If a player ranks in the top 10 among freshmen, sophomores, or defensemen statewide in goals, assists, or points, weave that context into the recap naturally — but only for players who had a significant performance tonight (2+ goals or 2+ points).
+- Use the exact phrasing provided. Example: "Storey leads all sophomores in the state in points this season with 88."
+- One sentence maximum per player. Place in the middle of the recap, not the opening or closing paragraph.
+- Do not invent or modify the ranking or totals provided.
+
 SINGLE-GAME LEADERBOARD CONTEXT (if provided):
 - If a player's performance ranks on the season leaderboard, you MUST weave that context into the recap using the exact phrasing provided in the leaderboard note. Do not paraphrase or omit it.
 - Example: "Callan made 78 saves, the most in a single game in the state this season."
@@ -1019,6 +1025,80 @@ async function fetchSectionSeeds(tournamentContext, teamNames) {
   return seeds;
 }
 
+// Fetch freshman, sophomore, and defenseman season scoring leaders from stats JSON
+async function fetchClassLeaderboards(gameData) {
+  const notes = [];
+  try {
+    const url = 'https://raw.githubusercontent.com/LegacyHockey/legacy-hockey-data/main/stats-2025-26.json';
+    const json = await fetchViaProxy(url);
+    if (!json) return notes;
+    const data = JSON.parse(json);
+    const players = data.players || [];
+
+    // Build top-10 lists for each category by filtering and sorting
+    const categories = [
+      { label: 'freshman',   filter: p => p.grade === '9',               stat: 'points',  statLabel: 'points'  },
+      { label: 'freshman',   filter: p => p.grade === '9',               stat: 'goals',   statLabel: 'goals'   },
+      { label: 'freshman',   filter: p => p.grade === '9',               stat: 'assists', statLabel: 'assists' },
+      { label: 'sophomore',  filter: p => p.grade === '10',              stat: 'points',  statLabel: 'points'  },
+      { label: 'sophomore',  filter: p => p.grade === '10',              stat: 'goals',   statLabel: 'goals'   },
+      { label: 'sophomore',  filter: p => p.grade === '10',              stat: 'assists', statLabel: 'assists' },
+      { label: 'defenseman', filter: p => p.position === 'D',            stat: 'points',  statLabel: 'points'  },
+      { label: 'defenseman', filter: p => p.position === 'D',            stat: 'goals',   statLabel: 'goals'   },
+      { label: 'defenseman', filter: p => p.position === 'D',            stat: 'assists', statLabel: 'assists' },
+    ];
+
+    // All skaters in this game
+    const allSkaters = [...gameData.skaters.away, ...gameData.skaters.home];
+    // Build a set of skater names for quick lookup
+    const skaterNames = allSkaters.map(s => s.name.toLowerCase());
+
+    // Qualify: player must have 2+ goals or 2+ points tonight
+    const qualifyingSkaters = allSkaters.filter(s => s.g >= 2 || s.pts >= 2);
+
+    for (const cat of categories) {
+      const leaderboard = players
+        .filter(cat.filter)
+        .sort((a, b) => b[cat.stat] - a[cat.stat])
+        .slice(0, 10);
+
+      const cutoff = leaderboard.length > 0 ? leaderboard[leaderboard.length - 1][cat.stat] : 0;
+
+      for (const skater of qualifyingSkaters) {
+        // Match skater name against leaderboard entries
+        const skaterLower = skater.name.toLowerCase().replace(/[^a-z\s]/g, '').trim();
+        const entry = leaderboard.find(p => {
+          const pLower = p.name.toLowerCase().replace(/[^a-z\s]/g, '').trim();
+          return pLower === skaterLower || pLower.includes(skaterLower) || skaterLower.includes(pLower);
+        });
+        if (!entry) continue;
+
+        const rank = leaderboard.findIndex(p => {
+          const pLower = p.name.toLowerCase().replace(/[^a-z\s]/g, '').trim();
+          return pLower === skaterLower || pLower.includes(skaterLower) || skaterLower.includes(pLower);
+        }) + 1;
+        if (rank < 1 || rank > 10) continue;
+
+        const rankWord = rank === 1 ? 'leads' :
+          rank === 2 ? 'ranks second among' :
+          rank === 3 ? 'ranks third among' :
+          rank === 4 ? 'ranks fourth among' :
+          rank === 5 ? 'ranks fifth among' :
+          `ranks No. ${rank} among`;
+
+        const verb = rank === 1 ? `leads all ${cat.label}s` : `${rankWord} ${cat.label}s`;
+        const note = `${entry.name} (${cat.label}): ${verb} in the state in ${cat.statLabel} this season with ${entry[cat.stat]} ${cat.statLabel}`;
+
+        // Avoid duplicate notes for same player/stat combo
+        if (!notes.find(n => n.includes(entry.name) && n.includes(cat.statLabel) && n.includes(cat.label))) {
+          notes.push(note);
+        }
+      }
+    }
+  } catch(e) { console.warn('fetchClassLeaderboards failed:', e.message); }
+  return notes;
+}
+
 // Parse single-game leaders from GitHub JS file
 async function fetchLeaderboardContext(gameData) {
   const notes = [];
@@ -1233,6 +1313,13 @@ function formatGameData(g, enrichment) {
     L.push('SINGLE-GAME LEADERBOARD CONTEXT (verify accuracy before publishing — leaderboard reflects end-of-season standings):');
     enrichment.leaderboardNotes.forEach(note => L.push(`  - ${note}`));
   }
+
+  // Enrichment: class/position season leaderboards
+  if (enrichment?.classLeaderNotes?.length) {
+    L.push('');
+    L.push('FRESHMAN/SOPHOMORE/DEFENSEMAN SEASON LEADERS (weave into recap naturally where relevant — verify before publishing):');
+    enrichment.classLeaderNotes.forEach(note => L.push(`  - ${note}`));
+  }
   L.push('');
   if (g.periods.length >= 2) {
     L.push('PERIOD SCORES:');
@@ -1320,14 +1407,15 @@ async function generateRecap() {
     // Fetch enrichment data in parallel
     setLoading(true, 'Fetching records, rankings & leaderboard data...');
     const teamNames = [gd.awayTeam, gd.homeTeam];
-    const [records, rankings, leaderboardNotes, nicknames, sectionSeeds] = await Promise.all([
+    const [records, rankings, leaderboardNotes, nicknames, sectionSeeds, classLeaderNotes] = await Promise.all([
       fetchTeamRecords(gd),
       fetchStateRankings(teamNames),
       fetchLeaderboardContext(gd),
       fetchTeamNicknames(gd),
-      fetchSectionSeeds(gd.location, teamNames)
+      fetchSectionSeeds(gd.location, teamNames),
+      fetchClassLeaderboards(gd)
     ]);
-    const enrichment = { records, rankings, leaderboardNotes, nicknames, sectionSeeds };
+    const enrichment = { records, rankings, leaderboardNotes, nicknames, sectionSeeds, classLeaderNotes };
 
     const text = formatGameData(gd, enrichment);
     lastData = text;
