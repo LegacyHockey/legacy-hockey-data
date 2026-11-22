@@ -346,7 +346,11 @@
 <footer>Legacy Hockey internal tool — AI drafts require human review before publishing.</footer>
 
 <script>
-const SUBSEASON = "948428";
+// ── SEASON SETTINGS — update these three each season ──
+const SUBSEASON = "963021";        // 2026-27 Regular Season (the ?subseason= value on any game/schedule URL)
+const SEASON = "2026-27";          // reads stats-<SEASON>.json; class leaders are skipped until that file exists
+const SEASON_START = "2026-07-01";
+const RANKINGS_ARE_PRESEASON = true; // set to false once the first in-season rankings are posted // single-game leaderboard is ignored if it was last updated before this date
 const KEY_STORE = "lh_recap_api_key";
 
 const STYLE_PROMPT = `You are a hockey writer for Legacy.Hockey, a site covering MSHSL (Minnesota State High School League) hockey.
@@ -621,6 +625,7 @@ async function fetchViaProxy(url) {
 
 // Team name → standings page node ID lookup
 // Format: 'Team Name': nodeId
+// 2025-26 page IDs — not used anywhere; kept for reference only
 const TEAM_NODE_IDS = {
   // Big 9
   'Austin': 9113383, 'Faribault': 9113384, 'Mankato East': 9113385, 'Mankato West': 9113386,
@@ -687,14 +692,9 @@ const TEAM_NODE_IDS = {
 // Team name -> conference standings node ID
 // Used when the team page node ID doesn't match any conference standings page
 const TEAM_STANDINGS_NODE = {
-  'Lake of the Woods': 9113582,
-  'Baudette': 9113582,
-  'Roseau': 9113582,
-  'Warroad': 9113582,
-  'East Grand Forks': 9113580,
-  'Crookston': 9113579,
-  'Thief River Falls': 9113581,
-  'Bemidji': 9113578,
+  // Empty for 2026-27. Each team's own page ID (taken from the boxscore) opens its conference standings.
+  // Team page IDs change every season, and an old ID with the new subseason silently shows LAST season's
+  // standings, so only add an entry here if a team's own page has no standings.
 };
 
 // Team nickname lookup — fallback for teams whose pages are JS-rendered
@@ -795,7 +795,8 @@ async function fetchTeamRecords(gameData) {
           const cells = row.querySelectorAll('td');
           if (cells.length < 10) return;
           const rowName = cells[0]?.textContent?.trim().toLowerCase();
-          const record = cells[9]?.textContent?.trim();
+          // Overall W-L-T is the last record-shaped cell (column count changes when Override appears)
+          const record = [...cells].map(c => c.textContent.trim()).reverse().find(t => /^\d+-\d+-\d+$/.test(t));
           if (record && rowName &&
               (rowName.includes(teamLower) || teamLower.includes(rowName))) {
             records[team.name] = record;
@@ -1029,23 +1030,40 @@ async function fetchSectionSeeds(tournamentContext, teamNames) {
 async function fetchClassLeaderboards(gameData) {
   const notes = [];
   try {
-    const url = 'https://raw.githubusercontent.com/LegacyHockey/legacy-hockey-data/main/stats-2025-26.json';
+    // Current season only — last season's totals would credit players with the wrong numbers and the wrong class
+    const url = `https://raw.githubusercontent.com/LegacyHockey/legacy-hockey-data/main/stats-${SEASON}.json`;
     const json = await fetchViaProxy(url);
-    if (!json) return notes;
+    if (!json || !json.trim().startsWith('{')) { console.warn('No stats file yet for', SEASON); return notes; }
     const data = JSON.parse(json);
+    if (data.season && data.season !== SEASON) { console.warn('Stats file is for', data.season); return notes; }
     const players = data.players || [];
+
+    // Grades come in three formats: "9", "Fr.", or graduation year ("2030")
+    const seasonEndYear = parseInt(SEASON.slice(0, 4)) + 1;
+    const gradeOf = p => {
+      const g = String(p.grade || '').trim();
+      if (g === 'Fr.') return 9;
+      if (g === 'So.') return 10;
+      if (g === 'Jr.') return 11;
+      if (g === 'Sr.') return 12;
+      if (/^\d{4}$/.test(g)) return 12 - (parseInt(g) - seasonEndYear);
+      return parseInt(g) || 0;
+    };
+    // Primary position is listed first ("D", "D|F")
+    const isD = p => String(p.position || '').split('|')[0] === 'D';
+    const normName = n => n.toLowerCase().replace(/[^a-z\s]/g, '').replace(/\s+/g, ' ').trim();
 
     // Build top-10 lists for each category by filtering and sorting
     const categories = [
-      { label: 'freshman',   filter: p => p.grade === '9',               stat: 'points',  statLabel: 'points'  },
-      { label: 'freshman',   filter: p => p.grade === '9',               stat: 'goals',   statLabel: 'goals'   },
-      { label: 'freshman',   filter: p => p.grade === '9',               stat: 'assists', statLabel: 'assists' },
-      { label: 'sophomore',  filter: p => p.grade === '10',              stat: 'points',  statLabel: 'points'  },
-      { label: 'sophomore',  filter: p => p.grade === '10',              stat: 'goals',   statLabel: 'goals'   },
-      { label: 'sophomore',  filter: p => p.grade === '10',              stat: 'assists', statLabel: 'assists' },
-      { label: 'defenseman', filter: p => p.position === 'D',            stat: 'points',  statLabel: 'points'  },
-      { label: 'defenseman', filter: p => p.position === 'D',            stat: 'goals',   statLabel: 'goals'   },
-      { label: 'defenseman', filter: p => p.position === 'D',            stat: 'assists', statLabel: 'assists' },
+      { label: 'freshman',   filter: p => gradeOf(p) === 9, stat: 'points',  statLabel: 'points'  },
+      { label: 'freshman',   filter: p => gradeOf(p) === 9, stat: 'goals',   statLabel: 'goals'   },
+      { label: 'freshman',   filter: p => gradeOf(p) === 9, stat: 'assists', statLabel: 'assists' },
+      { label: 'sophomore',  filter: p => gradeOf(p) === 10, stat: 'points',  statLabel: 'points'  },
+      { label: 'sophomore',  filter: p => gradeOf(p) === 10, stat: 'goals',   statLabel: 'goals'   },
+      { label: 'sophomore',  filter: p => gradeOf(p) === 10, stat: 'assists', statLabel: 'assists' },
+      { label: 'defenseman', filter: isD, stat: 'points',  statLabel: 'points'  },
+      { label: 'defenseman', filter: isD, stat: 'goals',   statLabel: 'goals'   },
+      { label: 'defenseman', filter: isD, stat: 'assists', statLabel: 'assists' },
     ];
 
     // All skaters in this game
@@ -1068,14 +1086,14 @@ async function fetchClassLeaderboards(gameData) {
 
     // For each qualifying skater, collect all category/stat combos where they rank top 10
     for (const skater of qualifyingSkaters) {
-      const skaterLower = skater.name.toLowerCase().replace(/[^a-z\s]/g, '').trim();
+      const skaterLower = normName(skater.name);
 
       // Group findings by class/position label
       const findings = {}; // { 'freshman': [{stat, rank, value, entry}], ... }
 
       for (const [key, lb] of Object.entries(leaderboards)) {
         const rank = lb.entries.findIndex(p => {
-          const pLower = p.name.toLowerCase().replace(/[^a-z\s]/g, '').trim();
+          const pLower = normName(p.name);
           return pLower === skaterLower || pLower.includes(skaterLower) || skaterLower.includes(pLower);
         });
         if (rank < 0) continue;
@@ -1093,23 +1111,24 @@ async function fetchClassLeaderboards(gameData) {
         const statOrder = ['points', 'goals', 'assists'];
         stats.sort((a, b) => statOrder.indexOf(a.stat) - statOrder.indexOf(b.stat));
 
+        const plural = { freshman: 'freshmen', sophomore: 'sophomores', defenseman: 'defensemen' };
         const rankPhrase = (rank, label, stat, value) => {
           const tiedCheck = (lb) => lb.entries.filter(p => p[stat] === value).length > 1;
           const lb = leaderboards[label + '_' + stat];
           const tied = lb && tiedCheck(lb) && rank === 1;
-          if (rank === 1 && !tied) return `leads all ${label}s in the state in ${stat} this season with ${value}`;
-          if (rank === 1 && tied)  return `is tied for the lead among ${label}s in the state in ${stat} this season with ${value}`;
+          if (rank === 1 && !tied) return `leads all ${plural[label]} in the state in ${stat} this season with ${value}`;
+          if (rank === 1 && tied)  return `is tied for the lead among ${plural[label]} in the state in ${stat} this season with ${value}`;
           const ordinals = ['','first','second','third','fourth','fifth','sixth','seventh','eighth','ninth','tenth'];
-          return `ranks ${ordinals[rank] || 'No. ' + rank} among ${label}s in the state in ${stat} this season with ${value}`;
+          return `ranks ${ordinals[rank] || 'No. ' + rank} among ${plural[label]} in the state in ${stat} this season with ${value}`;
         };
 
         // Primary note: lead stat
         const primary = stats[0];
-        let note = `${entry.name} ${rankPhrase(primary.rank, label, primary.stat, primary.value)}`;
+        let note = `${entry.name.replace(/\s+/g, ' ').trim()} ${rankPhrase(primary.rank, label, primary.stat, primary.value)}`;
 
         // Additional stats as a follow-up clause
         if (stats.length > 1) {
-          const lastName = entry.name.trim().split(/\s+/).pop();
+          const lastName = entry.name.trim().split(/\s+/).pop(); // already whitespace-safe
           const extras = stats.slice(1).map(s => {
             const lb = leaderboards[label + '_' + s.stat];
             const tied = lb && lb.entries.filter(p => p[s.stat] === s.value).length > 1 && s.rank === 1;
@@ -1135,6 +1154,9 @@ async function fetchLeaderboardContext(gameData) {
     const url = 'https://raw.githubusercontent.com/LegacyHockey/legacy-hockey-data/refs/heads/main/single-game-leaders.js';
     const js = await fetchViaProxy(url);
     if (!js) return notes;
+    // Skip last season's leaderboard — it would label tonight's totals "this season" against old numbers
+    const upd = js.match(/Last updated:\s*(\d{4}-\d{2}-\d{2})/);
+    if (!upd || upd[1] < SEASON_START) { console.warn('Single-game leaderboard not yet updated for', SEASON); return notes; }
 
     // Extract table data from the JS HTML string
     const doc = new DOMParser().parseFromString(js, 'text/html');
@@ -1317,6 +1339,7 @@ function formatGameData(g, enrichment) {
     if (awayRank?.rank || homeRank?.rank) {
       L.push('');
       L.push('STATE RANKINGS (these are poll rankings, not seeds — reference naturally if relevant. Always include the class in parenthesis after the ranking number, e.g. "No. 3 (2A)" or "No. 5 (1A)"):');
+      if (RANKINGS_ARE_PRESEASON) L.push('  These are PRESEASON rankings. Always call them preseason, e.g. "preseason No. 3 (2A) Moorhead" or "No. 3 (2A) in the preseason rankings".');
       if (awayRank) L.push(`  ${g.awayTeam}: No. ${awayRank.rank} (Class ${awayRank.classLabel})`);
       if (homeRank) L.push(`  ${g.homeTeam}: No. ${homeRank.rank} (Class ${homeRank.classLabel})`);
       if (!awayRank) L.push(`  ${g.awayTeam}: unranked`);
@@ -1414,7 +1437,7 @@ async function callClaude(text) {
   const r = await fetch('https://api.anthropic.com/v1/messages', {
     method: 'POST',
     headers: { 'Content-Type':'application/json', 'x-api-key':getKey(), 'anthropic-version':'2023-06-01', 'anthropic-dangerous-direct-browser-access':'true' },
-    body: JSON.stringify({ model:'claude-sonnet-4-20250514', max_tokens:1000, system:STYLE_PROMPT, messages:[{role:'user', content:`Here is the boxscore data. Please write a game recap following your style guidelines.\n\n${text}`}] })
+    body: JSON.stringify({ model:'claude-sonnet-5-5', max_tokens:1000, system:STYLE_PROMPT, messages:[{role:'user', content:`Here is the boxscore data. Please write a game recap following your style guidelines.\n\n${text}`}] })
   });
   if (!r.ok) { const e = await r.json().catch(()=>({})); throw new Error(e?.error?.message || `API error ${r.status}`); }
   return (await r.json()).content[0].text;
