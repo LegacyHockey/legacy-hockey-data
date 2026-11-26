@@ -391,6 +391,7 @@ RULES:
 - If a player scored 2+ goals, call that out specifically.
 - If a goalie faced 30+ shots, mention it.
 - If a team scored 3+ goals in a single period, flag it as a dominant period.
+- Overtime winners: generally name the overtime goal scorer and the time in the first paragraph, usually in the second sentence (e.g. "Graham Schumacher scored the winner at 3:33 of overtime."). This is a strong default, not an absolute.
 - For overtime: use "overtime" for one OT period, "double overtime" for two OT periods, "triple overtime" for three, etc. The game data will specify how many OT periods were played.
 - Always use the exact venue name provided in the game data. Never substitute a different or more familiar arena name.
 - Do not invent context, records, historical comparisons, or superlatives not present in the data.
@@ -411,6 +412,11 @@ STATE RANKINGS (if provided):
 - Always include the class abbreviation in parenthesis immediately after the ranking number — use (2A) or (1A), never spell out "Class 2A" or "Class 1A". Examples: "No. 3 (2A)-ranked Moorhead" or "No. 5 (1A) Warroad"
 - Include teams from both the Top 10 and Next 10 if they appear in the data.
 - If a team is unranked, do not reference rankings for that team.
+
+UPSETS (if an UPSET line is provided):
+- Lead with the upset. The opening sentence must still state the winner and the final score first, using "upset" as the verb. Example: "Park of Cottage Grove upset Stillwater 6-5 in overtime..."
+- Keep the ranking number itself out of the first paragraph, as with all rankings; give it in the second or third paragraph.
+- Only call a result an upset when the data includes an UPSET line.
 
 PLAYOFF SEEDS (if provided):
 - For section/state tournament games, reference seeds naturally. Examples: "Minnetonka, the No. 1 seed..." or "Moorhead, seeded No. 2..."
@@ -493,6 +499,18 @@ async function proxyFetch(url, minLength) {
   throw new Error('Could not load page. All proxies failed — please try again shortly.');
 }
 
+// ── TEAM NAME MATCHING ──
+// Exact match after normalizing punctuation. "St. Cloud" must never match "St. Cloud Cathedral".
+const normTeam = n => String(n || '').toLowerCase().replace(/&/g, ' and ').replace(/[^a-z0-9]+/g, ' ').trim();
+const sameTeam = (a, b) => normTeam(a) !== '' && normTeam(a) === normTeam(b);
+// Looser match for lists that use a short name: the list's name may be the END of the full name
+// ("Holy Angels" for "Academy of Holy Angels"), but never the other way around.
+const teamMatches = (fullName, listName) => {
+  const f = normTeam(fullName), l = normTeam(listName);
+  if (!f || !l) return false;
+  return f === l || (l.includes(' ') && f.endsWith(' ' + l)); // short name must be 2+ words
+};
+
 // ── PARSE ──
 function parseBoxscore(html) {
   const doc = new DOMParser().parseFromString(html, 'text/html');
@@ -509,35 +527,28 @@ function parseBoxscore(html) {
     awayNodeId: null, homeNodeId: null
   };
 
-  // Extract team page URLs and node IDs from links in the boxscore
-  const teamPageLinks = doc.querySelectorAll('a[href*="page/show"]');
-  const awayLower = g.awayTeam.toLowerCase();
-  const homeLower = g.homeTeam.toLowerCase();
+  // Team page links: the two team names in the boxscore header link to this season's team pages.
+  // (Don't scan every link on the page — an unlabeled link to the league standings page used to match both teams.)
   g.awayPageUrl = null;
   g.homePageUrl = null;
-  teamPageLinks.forEach(a => {
-    const text = a.textContent.trim().toLowerCase();
-    const href = a.getAttribute('href') || '';
-    const match = href.match(/page\/show\/(\d+)-([\w-]+)/);
-    if (!match) return;
-    const nodeId = match[1];
-    // Also try matching against the URL slug (e.g. "lake-of-the-woods" matches "Lake of the Woods")
-    const slug = match[2].replace(/-/g, ' ');
-    // Use full href but strip query string for clean page URL
-    const hrefClean = href.split('?')[0];
-    const cleanUrl = hrefClean.startsWith('http') ? hrefClean : 'https://www.legacy.hockey' + hrefClean;
-    const matchesAway = (text === awayLower || text.includes(awayLower) || awayLower.includes(text) || slug === awayLower || slug.includes(awayLower) || awayLower.includes(slug)) && (text.length > 2 || slug.length > 2);
-    const matchesHome = (text === homeLower || text.includes(homeLower) || homeLower.includes(text) || slug === homeLower || slug.includes(homeLower) || homeLower.includes(slug)) && (text.length > 2 || slug.length > 2);
-    if (!g.awayNodeId && matchesAway) {
-      g.awayNodeId = nodeId;
-      // Use node ID only in URL — slug can be truncated for multi-word team names
-      g.awayPageUrl = `https://www.legacy.hockey/page/show/${nodeId}`;
-    }
-    if (!g.homeNodeId && matchesHome) {
-      g.homeNodeId = nodeId;
-      g.homePageUrl = `https://www.legacy.hockey/page/show/${nodeId}`;
-    }
-  });
+  const headerLinks = Array.from(doc.querySelectorAll('.game-header a.team-name, .game-header .team-name a'));
+  const nodeFrom = a => ((a?.getAttribute('href') || '').match(/page\/show\/(\d+)/) || [])[1] || null;
+  if (headerLinks.length >= 2) {
+    g.awayNodeId = nodeFrom(headerLinks[0]);
+    g.homeNodeId = nodeFrom(headerLinks[1]);
+  }
+  if (!g.awayNodeId || !g.homeNodeId) {
+    // Fallback: a link whose text or URL name is exactly the team name
+    doc.querySelectorAll('a[href*="page/show"]').forEach(a => {
+      const m = (a.getAttribute('href') || '').match(/page\/show\/(\d+)-([\w-]+)/);
+      if (!m || /standings/i.test(m[2])) return;
+      const text = a.textContent.trim();
+      if (!g.awayNodeId && (sameTeam(text, g.awayTeam) || sameTeam(m[2], g.awayTeam))) g.awayNodeId = m[1];
+      if (!g.homeNodeId && (sameTeam(text, g.homeTeam) || sameTeam(m[2], g.homeTeam))) g.homeNodeId = m[1];
+    });
+  }
+  if (g.awayNodeId) g.awayPageUrl = `https://www.legacy.hockey/page/show/${g.awayNodeId}`;
+  if (g.homeNodeId) g.homePageUrl = `https://www.legacy.hockey/page/show/${g.homeNodeId}`;
 
   // Parse line score - only take rows with numeric scores, deduplicate
   const lineScoreTable = doc.querySelector('.line_score_v2');
@@ -697,81 +708,146 @@ const TEAM_STANDINGS_NODE = {
   // standings, so only add an entry here if a team's own page has no standings.
 };
 
-// Team nickname lookup — fallback for teams whose pages are JS-rendered
+// Team nickname lookup — copied from each team's 2026-27 page (Team Information > Nickname), Nov 25, 2026.
+// Used when a team page doesn't show a nickname. No nickname listed: Minneapolis, St. Paul, Spring Lake Park/Coon Rapids.
 const TEAM_NICKNAMES = {
-  // Big 9
-  'Austin': 'Packers', 'Faribault': 'Falcons', 'Mankato East': 'Cougars',
-  'Mankato West': 'Scarlets', 'Northfield': 'Raiders', 'Owatonna': 'Huskies',
-  'Rochester Century': 'Panthers', 'Rochester John Marshall': 'Rockets',
-  'Rochester Mayo': 'Spartans', 'Winona': 'Winhawks',
-  // Central Lakes
-  'Alexandria': 'Cardinals', 'Brainerd': 'Warriors', 'Detroit Lakes': 'Lakers',
-  'Fergus Falls': 'Otters', 'Sartell-St. Stephen': 'Sabres',
-  'St. Cloud Apollo': 'Eagles', 'St. Cloud Cathedral': 'Crusaders',
-  'St. Cloud Tech': 'Tigers', 'Willmar': 'Cardinals',
-  // Iron Range
-  'Eveleth-Gilbert': 'Golden Bears', 'Greenway': 'Raiders',
-  'Hibbing/Chisholm': 'Bluejackets', 'International Falls': 'Broncos',
-  'Virginia': 'Blues',
-  // Lake
-  'Chaska': 'Hawks', 'Chanhassen': 'Storm', 'Eden Prairie': 'Eagles',
-  'Edina': 'Hornets', 'Hopkins': 'Royals', 'Minnetonka': 'Skippers',
-  'Prior Lake': 'Lakers', 'Shakopee': 'Sabers',
-  // Lake Superior
-  'Cloquet-Esko-Carlton': 'Lumberjacks', 'Duluth Denfeld': 'Hunters',
-  'Duluth East': 'Greyhounds', 'Duluth Marshall': 'Hilltoppers',
-  'Hermantown': 'Hawks', 'Proctor/Hermantown': 'Rails', 'Two Harbors': 'Agates',
-  // Metro East
-  'Hill-Murray': 'Pioneers', 'Mahtomedi': 'Zephyrs',
-  'St. Thomas Academy': 'Cadets', 'Simley': 'Spartans',
-  'South St. Paul': 'Packers', 'Tartan': 'Titans', 'Two Rivers': 'Fox',
-  // Metro West / Lake
-  'Bloomington Jefferson': 'Jaguars', 'Burnsville': 'Blaze',
-  'Holy Angels': 'Stars', 'Rosemount': 'Irish',
-  'St. Louis Park': 'Orioles', 'Wayzata': 'Trojans',
-  // Mississippi 8
-  'Centennial': 'Cougars', 'Forest Lake': 'Rangers', 'Mounds View': 'Mustangs',
-  'Spring Lake Park': 'Panthers', 'Stillwater': 'Ponies',
+  'Albert Lea': 'Tigers',
+  'Austin': 'Packers',
+  'Mankato East': 'Cougars',
+  'Mankato West': 'Scarlets',
+  'Northfield': 'Raiders',
+  'Owatonna': 'Huskies',
+  'Red Wing': 'Wingers',
+  'Rochester Century/John Marshall': 'Panthers',
+  'Rochester Mayo': 'Spartans',
+  'Winona': 'Winhawks',
+  'Fairmont': 'Cardinals',
+  'Luverne': 'Cardinals',
+  'Marshall': 'Tigers',
+  'Minnesota River': 'Bulldogs',
+  'New Ulm': 'Eagles',
+  'Redwood Valley': 'Cardinals',
+  'Waseca': 'Bluejays',
+  'Windom': 'Eagles',
+  'Worthington': 'Trojans',
+  'Alexandria': 'Cardinals',
+  'Brainerd': 'Warriors',
+  'Detroit Lakes': 'Lakers',
+  'Fergus Falls': 'Otters',
+  'River Lakes': 'Stars',
+  'St. Cloud': 'Crush',
+  'Sartell': 'Sabres',
+  'Sauk Rapids-Rice': 'Storm',
+  'Willmar': 'Cardinals',
+  'Little Falls': 'Flyers',
+  'Northern Lakes': 'Lightning',
+  'St. Cloud Cathedral': 'Crusaders',
+  'Blake': 'Bears',
+  'Breck': 'Mustangs',
+  'Providence Academy': 'Lions',
+  'St. Paul Academy': 'Spartans',
+  'Duluth East': 'Greyhounds',
+  'Gentry Academy': 'Stars',
+  'La Crescent-Hokah': 'Lancers',
+  'Osseo': 'Orioles',
+  'Rochester Lourdes': 'Eagles',
+  'Ely': 'Timberwolves',
+  'Greenway': 'Raiders',
+  'International Falls': 'Broncos',
+  'Moose Lake Area': 'Rebels',
+  'Mora/Milaca': 'Mustangs',
+  'North Shore': 'Storm',
+  'Buffalo': 'Bison',
+  'Eden Prairie': 'Eagles',
+  'Edina': 'Hornets',
+  'Hopkins': 'Royals',
+  'Maple Grove': 'Crimson',
+  'Minnetonka': 'Skippers',
+  'St. Michael-Albertville': 'Knights',
+  'Wayzata': 'Trojans',
+  'Cloquet/Esko': 'Lumberjacks',
+  'Duluth Denfeld': 'Hunters',
+  'Duluth Marshall': 'Hilltoppers',
+  'Hermantown': 'Hawks',
+  'Proctor': 'Rails',
+  'Grand Rapids': 'Thunderhawks',
+  'Hibbing/Chisholm': 'Bluejackets',
+  'Rock Ridge': 'Wolverines',
+  'Bemidji': 'Lumberjacks',
+  'Crookston': 'Pirates',
+  'East Grand Forks': 'Green Wave',
+  'Moorhead': 'Spuds',
+  'Roseau': 'Rams',
+  'Thief River Falls': 'Prowlers',
+  'Warroad': 'Warriors',
+  'Hastings': 'Raiders',
+  'Two Rivers': 'Warriors',
+  'Hill-Murray': 'Pioneers',
+  'Mahtomedi': 'Zephyrs',
+  'St. Thomas Academy': 'Cadets',
+  'Simley': 'Spartans',
+  'South St. Paul': 'Packers',
+  'Tartan/North': 'Titans',
+  'Benilde-St. Margaret\'s': 'Red Knights',
+  'Bloomington Jefferson': 'Jaguars',
+  'Chanhassen': 'Storm',
+  'Chaska': 'Hawks',
+  'New Prague': 'Trojans',
+  'Orono': 'Spartans',
+  'St. Louis Park': 'Orioles',
+  'Waconia': 'Wildcats',
+  'Becker/Big Lake': 'Eagles',
+  'Cambridge-Isanti': 'Bluejackets',
+  'Chisago Lakes': 'Wildcats',
+  'Monticello': 'Moose',
+  'Northern Edge': 'Edge',
+  'Princeton': 'Tigers',
+  'Pine City Area': 'Dragons',
+  'Bagley/Fosston': 'Flyers',
+  'Kittson County Central': 'Bearcats',
+  'Lake of the Woods': 'Bears',
+  'Red Lake Falls': 'Eagles',
+  'Andover': 'Huskies',
+  'Anoka': 'Tornadoes',
+  'Blaine': 'Bengals',
+  'Centennial': 'Cougars',
+  'Champlin Park': 'Rebels',
+  'Elk River/Zimmerman': 'Elks',
+  'Robbinsdale Armstrong/Cooper': 'Wings',
+  'Rogers': 'Royals',
+  'Totino-Grace': 'Eagles',
+  'Apple Valley/Burnsville': 'Eagles',
+  'Eagan': 'Wildcats',
+  'Eastview': 'Lightning',
+  'Farmington': 'Tigers',
+  'Lakeville North': 'Panthers',
+  'Lakeville South': 'Cougars',
+  'Prior Lake': 'Lakers',
+  'Rosemount': 'Irish',
+  'Shakopee': 'Sabers',
+  'Cretin-Derham Hall': 'Raiders',
+  'East Ridge': 'Raptors',
+  'Forest Lake': 'Rangers',
+  'Mounds View': 'Mustangs',
+  'Park of Cottage Grove': 'Wolfpack',
+  'Roseville': 'Raiders',
+  'Stillwater': 'Ponies',
   'White Bear Lake': 'Bears',
-  // Northwest Suburban
-  'Armstrong/Cooper': 'Falcons', 'Buffalo': 'Bison',
-  'Champlin Park': 'Rebels', 'Maple Grove': 'Crimson',
-  'Osseo': 'Orioles', 'Park Center': 'Raiders', 'Plymouth': 'Panthers',
-  'Robbinsdale Cooper': 'Hawks',
-  // South Suburban / Big South
-  'Apple Valley': 'Eagles', 'Dodge County': 'Wildcats', 'Eastview': 'Lightning',
-  'Eagan': 'Wildcats', 'Farmington': 'Tigers', 'Hastings': 'Raiders',
-  'Lakeville North': 'Panthers', 'Lakeville South': 'Cougars',
-  'New Prague': 'Trojans', 'Red Wing': 'Wingers',
-  // Suburban East
-  'East Ridge': 'Raptors', 'Maplewood/Hill-Murray': 'Pioneers',
-  'North St. Paul': 'Polars', 'Woodbury': 'Royals', 'Park': 'Wolfpack',
-  // Tri-Metro / IMAC
-  'Academy of Holy Angels': 'Stars', "Benilde-St. Margaret's": 'Red Knights',
-  'Blake': 'Bears', 'Breck': 'Mustangs', 'Cretin-Derham Hall': 'Raiders',
-  'Gentry Academy': 'Stars', 'St. Paul Johnson': 'Governors',
-  'St. Paul Como Park': 'Cougars',
-  // Northwest
-  'Bemidji': 'Lumberjacks', 'Crookston': 'Pirates',
-  'East Grand Forks': 'Green Wave', 'Thief River Falls': 'Prowlers',
-  // West Central / Wright County
-  'Delano': 'Tigers', 'Detroit Lakes': 'Lakers',
-  'Litchfield/Dassel-Cokato': 'Dragons', 'Monticello': 'Magic',
-  'Montevideo': 'Thunder Hawks', 'Morris/Benson Area': 'Tigers',
-  'New London-Spicer': 'Wildcats', 'Ortonville': 'Trojans',
-  // Northwest / Border
-  'Moorhead': 'Spuds', 'Warroad': 'Warriors',
-  // Northern / 1A
-  'Lake of the Woods': 'Bears', 'Baudette': 'Panthers',
-  'Roseau': 'Rams', 'Ely': 'Timberwolves',
-  'Grand Rapids': 'Thunderhawks', 'Hibbing': 'Bluejackets',
-  'Chisholm': 'Bluestreaks', 'Tower-Soudan': 'Lakers',
-  'Cook County': 'Vikings', 'Mesabi East': 'Giants',
-  'Mountain Iron-Buhl': 'Rangers', 'North Branch': 'Vikings',
-  'Pequot Lakes': 'Patriots', 'Pine City': 'Dragons',
-  'Proctor': 'Rails', 'Rockford': 'Rockets',
-  'Sauk Rapids-Rice': 'Storm', 'Sartell': 'Sabres',
-  'St. Francis': 'Knights', 'Zimmerman': 'Thunder',
+  'Woodbury': 'Royals',
+  'Dodge County': 'Wildcats',
+  'Academy of Holy Angels': 'Stars',
+  'Irondale': 'Knights',
+  'Breckenridge/Wahpeton': 'Blades',
+  'Morris/Benson Area': 'Storm',
+  'Park Rapids': 'Panthers',
+  'Prairie Centre': 'North Stars',
+  'Wadena-Deer Creek': 'Wolverines',
+  'Delano': 'Tigers',
+  'Holy Family': 'Fire',
+  'Hutchinson': 'Tigers',
+  'Litchfield/Dassel-Cokato': 'Dragons',
+  'Westonka': 'White Hawks',
+  'Southwest Christian/Richfield': 'Stars',
 };
 
 // Fetch team records using node IDs extracted from the boxscore page
@@ -798,7 +874,7 @@ async function fetchTeamRecords(gameData) {
           // Overall W-L-T is the last record-shaped cell (column count changes when Override appears)
           const record = [...cells].map(c => c.textContent.trim()).reverse().find(t => /^\d+-\d+-\d+$/.test(t));
           if (record && rowName &&
-              (rowName.includes(teamLower) || teamLower.includes(rowName))) {
+              teamMatches(team.name, rowName)) {
             records[team.name] = record;
           }
         });
@@ -876,10 +952,12 @@ async function fetchTeamNicknames(gameData) {
       }
       allTableRows.forEach(row => {
         const cells = row.querySelectorAll('td');
-        if (cells.length >= 2 && cells[0]?.textContent?.trim() === 'Nickname:') {
-          nicknames[team.name] = cells[1]?.textContent?.trim();
+        const nick = cells[1]?.textContent?.trim();
+        if (cells.length >= 2 && cells[0]?.textContent?.trim() === 'Nickname:' && nick && nick !== 'N/A') {
+          nicknames[team.name] = nick;
         }
       });
+      if (!nicknames[team.name] && TEAM_NICKNAMES[team.name]) nicknames[team.name] = TEAM_NICKNAMES[team.name];
     } catch(e) { console.warn('fetchTeamNicknames failed for', team.name, e.message); }
     await new Promise(r => setTimeout(r, 300));
   }
@@ -930,8 +1008,7 @@ async function fetchStateRankings(teamNames) {
         // This should be the team name
         for (let ti = 0; ti < teamNames.length; ti++) {
           const teamName = teamNames[ti];
-          if (line.toLowerCase().indexOf(teamName.toLowerCase()) >= 0 ||
-              teamName.toLowerCase().indexOf(line.toLowerCase()) >= 0) {
+          if (teamMatches(teamName, line)) {
             if (!rankings[teamName]) rankings[teamName] = { rank: lastRank, classLabel: classLabel };
             break;
           }
@@ -950,8 +1027,7 @@ async function fetchStateRankings(teamNames) {
           const rank = 11 + idx;
           for (let ti = 0; ti < teamNames.length; ti++) {
             const teamName = teamNames[ti];
-            if (entry.toLowerCase().indexOf(teamName.toLowerCase()) >= 0 ||
-                teamName.toLowerCase().indexOf(entry.toLowerCase()) >= 0) {
+            if (teamMatches(teamName, entry)) {
               if (!rankings[teamName]) rankings[teamName] = { rank: rank, classLabel: classLabel };
               break;
             }
@@ -1015,8 +1091,7 @@ async function fetchSectionSeeds(tournamentContext, teamNames) {
       const seed = parseInt(m[1]);
       const bracketTeam = m[2].trim();
       for (const teamName of teamNames) {
-        if (bracketTeam.toLowerCase().includes(teamName.toLowerCase()) ||
-            teamName.toLowerCase().includes(bracketTeam.toLowerCase())) {
+        if (teamMatches(teamName, bracketTeam)) {
           if (!seeds[teamName]) seeds[teamName] = seed;
           break;
         }
@@ -1344,6 +1419,19 @@ function formatGameData(g, enrichment) {
       if (homeRank) L.push(`  ${g.homeTeam}: No. ${homeRank.rank} (Class ${homeRank.classLabel})`);
       if (!awayRank) L.push(`  ${g.awayTeam}: unranked`);
       if (!homeRank) L.push(`  ${g.homeTeam}: unranked`);
+    }
+  }
+
+  // Upset: unranked team beats a ranked team, or a lower-ranked team beats a higher-ranked one in the same class
+  const aS = parseInt(g.awayScore), hS = parseInt(g.homeScore);
+  if (enrichment?.rankings && aS !== hS) {
+    const winner = aS > hS ? g.awayTeam : g.homeTeam;
+    const loser  = aS > hS ? g.homeTeam : g.awayTeam;
+    const wr = enrichment.rankings[winner], lr = enrichment.rankings[loser];
+    const isUpset = lr?.rank && (!wr?.rank || (wr.classLabel === lr.classLabel && wr.rank > lr.rank));
+    if (isUpset) {
+      L.push('');
+      L.push(`UPSET: ${wr?.rank ? 'No. ' + wr.rank + ' (' + wr.classLabel + ')' : 'unranked'} ${winner} beat No. ${lr.rank} (${lr.classLabel}) ${loser}${RANKINGS_ARE_PRESEASON ? ' (preseason rankings)' : ''}. Lead with the upset.`);
     }
   }
 
