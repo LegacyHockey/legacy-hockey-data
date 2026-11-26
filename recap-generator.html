@@ -350,7 +350,7 @@
 const SUBSEASON = "963021";        // 2026-27 Regular Season (the ?subseason= value on any game/schedule URL)
 const SEASON = "2026-27";          // reads stats-<SEASON>.json; class leaders are skipped until that file exists
 const SEASON_START = "2026-07-01";
-const CLASS_LEADERS_START = "2026-12-15"; // no freshman/sophomore/defenseman leader notes before this date (too early in the season)
+const LEADER_NOTES_START = "2026-12-15"; // no class/defenseman leader notes or single-game leaderboard notes before this date (too early in the season)
 const RANKINGS_ARE_PRESEASON = true; // set to false once the first in-season rankings are posted // single-game leaderboard is ignored if it was last updated before this date
 const KEY_STORE = "lh_recap_api_key";
 
@@ -1105,8 +1105,8 @@ async function fetchSectionSeeds(tournamentContext, teamNames) {
 // Fetch freshman, sophomore, and defenseman season scoring leaders from stats JSON
 async function fetchClassLeaderboards(gameData) {
   const notes = [];
-  // Too early in the season for leader notes before CLASS_LEADERS_START
-  if (new Date().toISOString().slice(0, 10) < CLASS_LEADERS_START) { console.warn('Class leader notes start', CLASS_LEADERS_START); return notes; }
+  // Too early in the season for leader notes before LEADER_NOTES_START
+  if (new Date().toISOString().slice(0, 10) < LEADER_NOTES_START) { console.warn('Leader notes start', LEADER_NOTES_START); return notes; }
   try {
     // Current season only — last season's totals would credit players with the wrong numbers and the wrong class
     const url = `https://raw.githubusercontent.com/LegacyHockey/legacy-hockey-data/main/stats-${SEASON}.json`;
@@ -1228,6 +1228,8 @@ async function fetchClassLeaderboards(gameData) {
 // Parse single-game leaders from GitHub JS file
 async function fetchLeaderboardContext(gameData) {
   const notes = [];
+  // Too early in the season for single-game leaderboard notes before LEADER_NOTES_START
+  if (new Date().toISOString().slice(0, 10) < LEADER_NOTES_START) { console.warn('Leader notes start', LEADER_NOTES_START); return notes; }
   try {
     const url = 'https://raw.githubusercontent.com/LegacyHockey/legacy-hockey-data/refs/heads/main/single-game-leaders.js';
     const js = await fetchViaProxy(url);
